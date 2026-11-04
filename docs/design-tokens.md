@@ -26,6 +26,7 @@ resolved in the browser, so changing a variable restyles every utility with no r
 | -------------------------------- | ------------------------------------------------------------- |
 | `src/theme/tokens.css`           | Semantic tokens: the contract and the default identity        |
 | `src/theme/component-tokens.css` | Component tokens that default to semantic tokens              |
+| `src/theme/themes.css`           | The dark and glass themes, which reassign semantic tokens     |
 | `src/theme/tailwind.css`         | Maps tokens to Tailwind namespaces and clears default scales  |
 | `src/theme/base.css`             | Applies tokens to the document: body, borders, outline colors |
 | `src/theme/tokens.test.ts`       | Checks that the contract has no dangling or unused tokens     |
@@ -50,22 +51,23 @@ resolved in the browser, so changing a variable restyles every utility with no r
 
 ## Utility reference
 
-| Token group           | Example utilities                                                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Colors                | `bg-surface`, `text-muted-foreground`, `border-border-strong`                                                     |
-| Color with opacity    | `bg-primary/subtle`, `bg-destructive/50`                                                                          |
-| Typography            | `font-sans`, `font-heading`, `font-semibold`, `text-sm`                                                           |
-| Spacing               | `p-4` (multiple of the unit), `px-gutter`, `gap-section`                                                          |
-| Border radius         | `rounded-md`, `rounded-pill`                                                                                      |
-| Shadows               | `shadow-sm`, `shadow-md`, `shadow-lg`                                                                             |
-| Gradients             | `bg-backdrop`                                                                                                     |
-| Motion                | `duration-fast`, `ease-standard`                                                                                  |
-| Blur and transparency | `backdrop-blur-md`, `backdrop-blur-surface`, `opacity-disabled`                                                   |
-| Component tokens      | `h-control`, `px-control-x`, `rounded-control`, `p-panel`, `rounded-panel`, `shadow-panel`, `backdrop-blur-panel` |
+| Token group           | Example utilities                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Colors                | `bg-surface`, `text-muted-foreground`, `border-border-strong`                                                                                     |
+| Color with opacity    | `bg-primary/subtle`, `bg-destructive/50`                                                                                                          |
+| Typography            | `font-sans`, `font-heading`, `font-semibold`, `text-sm`                                                                                           |
+| Spacing               | `p-4` (multiple of the unit), `px-gutter`, `gap-section`                                                                                          |
+| Border radius         | `rounded-md`, `rounded-pill`                                                                                                                      |
+| Shadows               | `shadow-sm`, `shadow-md`, `shadow-lg`                                                                                                             |
+| Gradients             | `bg-backdrop`                                                                                                                                     |
+| Motion                | `duration-fast`, `ease-standard`                                                                                                                  |
+| Blur and transparency | `backdrop-blur-md`, `backdrop-blur-surface`, `opacity-disabled`                                                                                   |
+| Component tokens      | `h-control`, `h-control-sm`, `h-control-lg`, `px-control-x`, `rounded-control`, `p-panel`, `rounded-panel`, `shadow-panel`, `backdrop-blur-panel` |
 
 ## Adding a theme
 
-Reassign tokens in a `[data-theme]` block. Anything left out keeps its default.
+Add a `[data-theme]` block to `src/theme/themes.css`, reassigning tokens. Anything left out keeps
+its default. The contract test fails if a theme assigns a token that does not exist.
 
 ```css
 @layer theme {

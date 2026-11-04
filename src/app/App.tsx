@@ -1,3 +1,3 @@
 export function App() {
-  return <main className="min-h-dvh bg-background text-foreground" />
+  return <main className="min-h-dvh" />
 }

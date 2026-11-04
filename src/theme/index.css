@@ -1,5 +1,6 @@
 /* Order matters: the contract first, then what reads it. See docs/design-tokens.md. */
 @import './tokens.css';
 @import './component-tokens.css';
+@import './themes.css';
 @import './tailwind.css';
 @import './base.css';

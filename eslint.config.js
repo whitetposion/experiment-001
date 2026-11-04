@@ -17,6 +17,7 @@ const LAYERS = [
   'hooks',
   'lib',
   'services',
+  'showcase',
   'test',
   'theme',
   'types',
@@ -25,11 +26,12 @@ const LAYERS = [
 // Each layer lists what it may import. Anything else is an error, so dependencies
 // only point downwards. The README documents the same table.
 const ALLOWED_IMPORTS = {
-  app: LAYERS.filter((layer) => layer !== 'test'),
+  app: LAYERS.filter((layer) => layer !== 'test' && layer !== 'showcase'),
   'components/layout': ['components/layout', 'components/ui', 'hooks', 'lib', 'theme', 'types'],
   'components/ui': ['components/ui', 'hooks', 'lib', 'theme', 'types'],
   hooks: ['hooks', 'lib', 'theme', 'types'],
   services: ['services', 'lib', 'types'],
+  showcase: ['showcase', 'components/layout', 'components/ui', 'hooks', 'lib', 'theme', 'types'],
   theme: ['theme', 'lib', 'types'],
   lib: ['lib', 'types'],
   types: ['types'],
@@ -75,7 +77,7 @@ const layerBoundaries = Object.entries(ALLOWED_IMPORTS).map(([layer, allowed]) =
 const featureBoundaries = FEATURES.map((feature) => ({
   files: [`src/features/${feature}/**/*.{ts,tsx}`],
   rules: restrictImports(
-    forbidLayers(['test'], 'Production code must not import test utilities.'),
+    forbidLayers(['test', 'showcase'], 'Features must not import test or showcase code.'),
     {
       regex: '^@/app(?!/hooks$)(/|$)',
       message: 'Features may only import @/app/hooks from the app layer.',
@@ -127,7 +129,7 @@ export default defineConfig([
   ...layerBoundaries,
   ...featureBoundaries,
   {
-    files: ['src/{app,components,features}/**/*.{ts,tsx}'],
+    files: ['src/{app,components,features,showcase}/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': [
         'error',

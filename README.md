@@ -43,10 +43,17 @@ src/
   lib/           Shared utilities
   types/         Shared TypeScript types
   test/          Test setup and utilities
+  showcase/      Development-only component showcase
 ```
 
 Git does not track empty folders, so a folder with no code yet holds a `.gitkeep`. Delete it when
 the first real file lands.
+
+## Component showcase
+
+Run `npm run dev` and open <http://localhost:5173/showcase.html> to see every design-system
+component and state in the light, dark and glass themes. Add `?theme=dark` or `?theme=glass` to open
+on a theme. The page is not part of the production build.
 
 ## Design tokens
 
@@ -82,3 +89,4 @@ ESLint enforces these rules, so `npm run lint` fails on a violation.
 - `app` composes features. If two features need to talk to each other, move the shared part down a
   layer or compose them in `app`. Circular imports fail lint through `import-x/no-cycle`.
 - Tests and `src/test` may import from any layer. Production code must not import `@/test`.
+- `src/showcase` may import shared UI layers but not features, and nothing may import it.

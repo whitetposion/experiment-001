@@ -73,7 +73,9 @@
   --spacing: var(--ds-spacing-unit);
   --spacing-gutter: var(--ds-spacing-gutter);
   --spacing-section: var(--ds-spacing-section);
+  --spacing-control-sm: var(--ds-control-height-sm);
   --spacing-control: var(--ds-control-height);
+  --spacing-control-lg: var(--ds-control-height-lg);
   --spacing-control-x: var(--ds-control-padding-x);
   --spacing-panel: var(--ds-panel-padding);
 
@@ -104,6 +106,21 @@
   --default-transition-timing-function: var(--ds-ease-standard);
   --ease-standard: var(--ds-ease-standard);
   --ease-emphasized: var(--ds-ease-emphasized);
+  --animate-fade-in: ds-fade-in var(--ds-duration-fast) var(--ds-ease-standard);
+  --animate-scale-in: ds-scale-in var(--ds-duration-normal) var(--ds-ease-emphasized);
+
+  @keyframes ds-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes ds-scale-in {
+    from {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
 
   /* Blur and transparency */
   --blur-sm: var(--ds-blur-sm);

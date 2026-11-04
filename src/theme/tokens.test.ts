@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import base from './base.css?raw'
 import componentTokens from './component-tokens.css?raw'
 import tailwind from './tailwind.css?raw'
+import themes from './themes.css?raw'
 import tokens from './tokens.css?raw'
 
 function definedTokens(css: string) {
@@ -26,6 +27,10 @@ describe('design token contract', () => {
 
   it('exposes or consumes every token that is defined', () => {
     expect([...defined].filter((token) => !referenced.has(token))).toEqual([])
+  })
+
+  it('only assigns tokens from the contract in themes', () => {
+    expect([...definedTokens(themes)].filter((token) => !defined.has(token))).toEqual([])
   })
 
   it('keeps raw color values out of the Tailwind bridge and component tokens', () => {
