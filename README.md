@@ -60,6 +60,11 @@ on a theme. The page is not part of the production build.
 Direct and group chats share one `Conversation` model. See
 [docs/domain-model.md](docs/domain-model.md).
 
+## Mock backend
+
+The app talks to a `ChatApi` interface, implemented by an in-memory mock. See
+[docs/mock-api.md](docs/mock-api.md).
+
 ## Design tokens
 
 Components use semantic tokens, never hardcoded colors. See
