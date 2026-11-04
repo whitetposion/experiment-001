@@ -65,7 +65,7 @@ Every failure is an `ApiError`. `message` is written for people, so the UI can s
 ## Design notes
 
 **Each instance owns its data.** `createMockChatApi` is a factory, so tests never share state. The
-application will create one instance where the store is set up.
+application creates one instance in `src/main.tsx`.
 
 **Responses are copies.** A real network never shares objects with its caller, so the mock does not
 either. Code that changes a response cannot change the backend's data, which would hide bugs until
@@ -82,5 +82,5 @@ earlier, whenever the app is opened.
 
 ## Replacing the mock
 
-Write a class or factory that implements `ChatApi`, reject failures with `ApiError`, and change the
-one place that creates the instance. Nothing else depends on the mock.
+Write a class or factory that implements `ChatApi`, reject failures with `ApiError`, and pass it to
+`makeStore` in `src/main.tsx`. Nothing else depends on the mock.

@@ -16,6 +16,21 @@ export class ApiError extends Error {
   }
 }
 
+/** The plain form of an ApiError, which is safe to keep in Redux state. */
+export interface ApiFailure {
+  readonly code: ApiErrorCode
+  readonly message: string
+  readonly retryable: boolean
+}
+
+export function toApiFailure(error: unknown): ApiFailure {
+  if (error instanceof ApiError) {
+    return { code: error.code, message: error.message, retryable: error.retryable }
+  }
+
+  return { code: 'network', message: 'Something went wrong. Try again.', retryable: true }
+}
+
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError
 }

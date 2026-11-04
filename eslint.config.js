@@ -79,8 +79,8 @@ const featureBoundaries = FEATURES.map((feature) => ({
   rules: restrictImports(
     forbidLayers(['test', 'showcase'], 'Features must not import test or showcase code.'),
     {
-      regex: '^@/app(?!/hooks$)(/|$)',
-      message: 'Features may only import @/app/hooks from the app layer.',
+      regex: '^@/app(?!/(hooks|createApiThunk)$)(/|$)',
+      message: 'Features may only import @/app/hooks and @/app/createApiThunk.',
     },
     {
       regex: `^@/features/(?!${feature}(/|$))[^/]+/.+`,

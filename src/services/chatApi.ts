@@ -45,6 +45,16 @@ export interface EditMessageRequest {
   readonly text: string
 }
 
+export interface ReactionRequest {
+  readonly messageId: MessageId
+  readonly emoji: string
+}
+
+export interface MarkConversationReadResponse {
+  readonly conversation: Conversation
+  readonly participant: ConversationParticipant
+}
+
 export interface AddGroupMembersRequest {
   readonly conversationId: ConversationId
   readonly userIds: readonly UserId[]
@@ -72,6 +82,9 @@ export interface ChatApi {
   sendMessage(request: SendMessageRequest): Promise<ActiveMessage>
   editMessage(request: EditMessageRequest): Promise<ActiveMessage>
   deleteMessage(messageId: MessageId): Promise<DeletedMessage>
+  addReaction(request: ReactionRequest): Promise<ActiveMessage>
+  removeReaction(request: ReactionRequest): Promise<ActiveMessage>
+  markConversationRead(conversationId: ConversationId): Promise<MarkConversationReadResponse>
   addGroupMembers(request: AddGroupMembersRequest): Promise<GroupMembersResponse>
   removeGroupMember(request: RemoveGroupMemberRequest): Promise<GroupMembersResponse>
 }

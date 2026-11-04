@@ -5,9 +5,8 @@ import { App } from './App'
 
 describe('App', () => {
   it('renders the main landmark inside the app providers', () => {
-    const { store } = renderWithProviders(<App />)
+    renderWithProviders(<App />)
 
     expect(screen.getByRole('main')).toBeInTheDocument()
-    expect(store.getState()).toEqual({})
   })
 })

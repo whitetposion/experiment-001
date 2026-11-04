@@ -135,6 +135,16 @@ export function createMockChatApi({
       .sort((first, second) => first.createdAt.localeCompare(second.createdAt))
   }
 
+  function findActiveMessage(messageId: MessageId): ActiveMessage {
+    const message = findMessage(messageId)
+
+    if (message.state === 'deleted') {
+      throw new ApiError('conflict', 'This message was deleted.')
+    }
+
+    return message
+  }
+
   function canManageMembers(conversationId: ConversationId) {
     const role = membership(conversationId, currentUserId)?.role
     return role === 'owner' || role === 'admin'
@@ -283,6 +293,70 @@ export function createMockChatApi({
 
         messages.set(messageId, deleted)
         return deleted
+      }),
+
+    addReaction: ({ emoji, messageId }) =>
+      request(() => {
+        const message = findActiveMessage(messageId)
+        const exists = message.reactions.some(
+          (reaction) => reaction.emoji === emoji && reaction.userId === currentUserId,
+        )
+
+        // Adding twice succeeds, so retrying after a lost response is safe.
+        if (exists) {
+          return message
+        }
+
+        const updated: ActiveMessage = {
+          ...message,
+          reactions: [
+            ...message.reactions,
+            { emoji, userId: currentUserId, reactedAt: now().toISOString() },
+          ],
+        }
+
+        messages.set(messageId, updated)
+        return updated
+      }),
+
+    removeReaction: ({ emoji, messageId }) =>
+      request(() => {
+        const message = findActiveMessage(messageId)
+        const updated: ActiveMessage = {
+          ...message,
+          reactions: message.reactions.filter(
+            (reaction) => reaction.emoji !== emoji || reaction.userId !== currentUserId,
+          ),
+        }
+
+        messages.set(messageId, updated)
+        return updated
+      }),
+
+    markConversationRead: (conversationId) =>
+      request(() => {
+        const conversation = findConversation(conversationId)
+        const participant = membership(conversationId, currentUserId)
+
+        if (!participant) {
+          throw new ApiError('not-found', 'This conversation is no longer available.')
+        }
+
+        const updatedConversation: Conversation = {
+          ...conversation,
+          unread: { count: 0, firstUnreadMessageId: null },
+        }
+        const updatedParticipant: ConversationParticipant = {
+          ...participant,
+          lastReadMessageId: messagesOf(conversationId).at(-1)?.id ?? null,
+        }
+
+        conversations.set(conversationId, updatedConversation)
+        participants = participants.map((item) =>
+          item === participant ? updatedParticipant : item,
+        )
+
+        return { conversation: updatedConversation, participant: updatedParticipant }
       }),
 
     addGroupMembers: ({ conversationId, userIds }) =>

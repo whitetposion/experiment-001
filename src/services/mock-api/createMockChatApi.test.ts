@@ -268,6 +268,48 @@ describe('deleting', () => {
   })
 })
 
+describe('reactions', () => {
+  it('adds a reaction once, even when repeated', async () => {
+    const api = createApi()
+    const request = { messageId: othersMessage, emoji: '🔥' }
+
+    await api.addReaction(request)
+    const message = await api.addReaction(request)
+
+    expect(message.reactions).toEqual([{ emoji: '🔥', userId: maya, reactedAt: NOW.toISOString() }])
+  })
+
+  it("removes only the current user's reaction", async () => {
+    const api = createApi()
+    const liked = toMessageId('message-priya-4')
+
+    await api.addReaction({ messageId: liked, emoji: '❤️' })
+    const message = await api.removeReaction({ messageId: liked, emoji: '❤️' })
+
+    expect(message.reactions.map(({ userId }) => userId)).toEqual([toUserId('user-priya')])
+  })
+
+  it('rejects reacting to a deleted message', async () => {
+    const error = await failure(createApi().addReaction({ messageId: deletedMessage, emoji: '👍' }))
+
+    expect(error.code).toBe('conflict')
+  })
+})
+
+describe('marking as read', () => {
+  it('clears unread and moves the read position to the newest message', async () => {
+    const api = createApi()
+
+    const { conversation, participant } = await api.markConversationRead(direct)
+
+    expect(conversation.unread).toEqual({ count: 0, firstUnreadMessageId: null })
+    expect(participant.lastReadMessageId).toBe(toMessageId('message-rohan-6'))
+
+    const { conversations } = await api.getConversations()
+    expect(conversations.find(({ id }) => id === direct)?.unread.count).toBe(0)
+  })
+})
+
 describe('group members', () => {
   it('adds members to both the conversation and the participant records', async () => {
     const api = createApi()

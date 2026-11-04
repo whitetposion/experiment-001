@@ -34,6 +34,7 @@ src/
     messages/
     presence/
     search/
+    ui/
   theme/         Design tokens, theme definitions and theme provider
   services/
     mock-api/    Mock APIs
@@ -60,6 +61,11 @@ on a theme. The page is not part of the production build.
 Direct and group chats share one `Conversation` model. See
 [docs/domain-model.md](docs/domain-model.md).
 
+## State management
+
+Redux Toolkit holds normalized conversations, messages and presence. See
+[docs/state-management.md](docs/state-management.md).
+
 ## Mock backend
 
 The app talks to a `ChatApi` interface, implemented by an in-memory mock. See
@@ -79,23 +85,25 @@ ESLint enforces these rules, so `npm run lint` fails on a violation.
 - Dependencies only point downwards. Each layer may import only from itself and the layers listed
   here:
 
-| Layer               | May import                                                                |
-| ------------------- | ------------------------------------------------------------------------- |
-| `app`               | Everything except `test`                                                  |
-| `features`          | `components`, `hooks`, `lib`, `services`, `theme`, `types`, `@/app/hooks` |
-| `components/layout` | `components/ui`, `hooks`, `lib`, `theme`, `types`                         |
-| `components/ui`     | `hooks`, `lib`, `theme`, `types`                                          |
-| `hooks`             | `lib`, `theme`, `types`                                                   |
-| `services`          | `lib`, `types`                                                            |
-| `theme`             | `lib`, `types`                                                            |
-| `lib`               | `types`                                                                   |
-| `types`             | Nothing                                                                   |
+| Layer               | May import                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| `app`               | Everything except `test`                                                                          |
+| `features`          | `components`, `hooks`, `lib`, `services`, `theme`, `types`, `@/app/hooks`, `@/app/createApiThunk` |
+| `components/layout` | `components/ui`, `hooks`, `lib`, `theme`, `types`                                                 |
+| `components/ui`     | `hooks`, `lib`, `theme`, `types`                                                                  |
+| `hooks`             | `lib`, `theme`, `types`                                                                           |
+| `services`          | `lib`, `types`                                                                                    |
+| `theme`             | `lib`, `types`                                                                                    |
+| `lib`               | `types`                                                                                           |
+| `types`             | Nothing                                                                                           |
 
 - Each feature exposes its public API from `index.ts`. Other features import
   `@/features/messages`, never `@/features/messages/hooks/useMessages`. Inside its own folder, a
   feature uses its full `@/features/messages/...` path.
 - Features read Redux types and typed hooks from `@/app/hooks`, never from `@/app/store`. The store
   imports feature slices, so this keeps the dependency one-way at runtime.
+- Features depend on each other in one direction: `ui`, then `conversations`, then `messages`, then
+  `presence`.
 - `app` composes features. If two features need to talk to each other, move the shared part down a
   layer or compose them in `app`. Circular imports fail lint through `import-x/no-cycle`.
 - Tests and `src/test` may import from any layer. Production code must not import `@/test`.

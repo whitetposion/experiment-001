@@ -1,13 +1,21 @@
 import { combineSlices, configureStore } from '@reduxjs/toolkit'
+import { conversationsSlice } from '@/features/conversations'
+import { messagesSlice } from '@/features/messages'
+import { presenceSlice } from '@/features/presence'
+import { uiSlice } from '@/features/ui'
+import type { ChatApi } from '@/services/chatApi'
 
-// Register each feature slice here, for example combineSlices(messagesSlice).
-const rootReducer = combineSlices()
+const rootReducer = combineSlices(conversationsSlice, messagesSlice, presenceSlice, uiSlice)
 
-export function makeStore() {
-  return configureStore({ reducer: rootReducer })
+/** The backend is passed in, so swapping the mock for a real API changes only the caller. */
+export function makeStore({ api }: { api: ChatApi }) {
+  return configureStore({
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({ thunk: { extraArgument: { api } } }),
+  })
 }
 
 export type AppStore = ReturnType<typeof makeStore>
 export type AppDispatch = AppStore['dispatch']
-// eslint-disable-next-line @typescript-eslint/no-generated-empty-object-type -- empty until the first slice is registered
 export type RootState = ReturnType<typeof rootReducer>
