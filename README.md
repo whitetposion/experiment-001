@@ -55,6 +55,11 @@ Run `npm run dev` and open <http://localhost:5173/showcase.html> to see every de
 component and state in the light, dark and glass themes. Add `?theme=dark` or `?theme=glass` to open
 on a theme. The page is not part of the production build.
 
+## Domain model
+
+Direct and group chats share one `Conversation` model. See
+[docs/domain-model.md](docs/domain-model.md).
+
 ## Design tokens
 
 Components use semantic tokens, never hardcoded colors. See
