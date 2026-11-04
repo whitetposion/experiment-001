@@ -1,13 +1,18 @@
+export { MessageList } from './components/MessageList'
+export { MessageStatusIndicator } from './components/MessageStatusIndicator'
 export {
   selectIsOwnMessage,
   selectMessageById,
+  selectMessageView,
   selectReactionSummary,
   selectReplyTarget,
   selectThreadError,
   selectThreadHasMore,
   selectThreadMessageIds,
   selectThreadStatus,
+  type MessageView,
   type ReactionSummary,
+  type ReplyPreview,
 } from './state/selectors'
 export {
   messageReceived,

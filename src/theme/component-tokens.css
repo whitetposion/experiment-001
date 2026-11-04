@@ -14,6 +14,10 @@
     --ds-control-padding-x: 1rem;
     --ds-control-radius: var(--ds-radius-pill);
 
+    /* Bubbles from other people follow the elevated surface */
+    --ds-color-bubble-other: var(--ds-color-surface-elevated);
+    --ds-color-bubble-other-foreground: var(--ds-color-surface-elevated-foreground);
+
     /* Cards, dialogs and other contained panels */
     --ds-panel-padding: 1.5rem;
     --ds-panel-radius: var(--ds-radius-xl);

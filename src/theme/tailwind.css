@@ -30,6 +30,12 @@
   --color-surface-elevated: var(--ds-color-surface-elevated);
   --color-surface-elevated-foreground: var(--ds-color-surface-elevated-foreground);
   --color-overlay: var(--ds-color-overlay);
+  --color-bubble-own: var(--ds-color-bubble-own);
+  --color-bubble-own-foreground: var(--ds-color-bubble-own-foreground);
+  --color-bubble-own-muted: var(--ds-color-bubble-own-muted);
+  --color-bubble-own-accent: var(--ds-color-bubble-own-accent);
+  --color-bubble-other: var(--ds-color-bubble-other);
+  --color-bubble-other-foreground: var(--ds-color-bubble-other-foreground);
   --color-primary: var(--ds-color-primary);
   --color-primary-foreground: var(--ds-color-primary-foreground);
   --color-secondary: var(--ds-color-secondary);

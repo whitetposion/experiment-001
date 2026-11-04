@@ -69,8 +69,11 @@ list, and one per thread.
 Features import each other in one direction only, and `import-x/no-cycle` enforces it:
 
 ```
-ui ──▶ conversations ──▶ messages ──▶ presence
+chat ──▶ ui ──▶ conversations ──▶ messages ──▶ presence
 ```
+
+`chat` holds no state. It composes the chat window from the features below it, which is why
+`ChatWindow` and `MessageComposer` live there and not in `messages`.
 
 `conversations` reacts to message actions, so it imports `messages`. That rules out the reverse, so
 `fetchConversations` dispatches `messagesReceived` to hand over its preview messages.
@@ -106,6 +109,11 @@ only where a selector builds a new object or array.
 
 **Fallbacks are shared constants.** An unloaded thread returns the same `EMPTY_THREAD`, and messages
 with no reactions share `NO_REACTIONS`. A fresh `[]` would look like a change on every update.
+
+**Each bubble has one subscription.** `selectMessageView` gathers everything a bubble renders, and
+returns a new object only when that message, the one before it, or the one it replies to changes.
+`MessageBubble` is wrapped in `memo`, because the list re-renders for each new message. Its props are
+IDs and one stable callback, so only the new bubble renders. `MessageList.test.tsx` counts this.
 
 **Derived data is not stored.** Titles, previews, reaction counts and filtered lists are computed by
 selectors, so there is nothing to keep in sync.

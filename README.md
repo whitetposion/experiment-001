@@ -33,6 +33,7 @@ src/
     conversations/
     messages/
     presence/
+    chat/
     search/
     ui/
   theme/         Design tokens, theme definitions and theme provider
@@ -102,8 +103,8 @@ ESLint enforces these rules, so `npm run lint` fails on a violation.
   feature uses its full `@/features/messages/...` path.
 - Features read Redux types and typed hooks from `@/app/hooks`, never from `@/app/store`. The store
   imports feature slices, so this keeps the dependency one-way at runtime.
-- Features depend on each other in one direction: `ui`, then `conversations`, then `messages`, then
-  `presence`.
+- Features depend on each other in one direction: `chat`, then `ui`, then `conversations`, then
+  `messages`, then `presence`.
 - `app` composes features. If two features need to talk to each other, move the shared part down a
   layer or compose them in `app`. Circular imports fail lint through `import-x/no-cycle`.
 - Tests and `src/test` may import from any layer. Production code must not import `@/test`.

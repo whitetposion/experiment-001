@@ -21,6 +21,12 @@
     --ds-color-surface-elevated-foreground: oklch(0.2 0.008 165);
     --ds-color-overlay: oklch(0.18 0.01 165 / 0.45);
 
+    /* Message bubbles */
+    --ds-color-bubble-own: oklch(0.93 0.05 155);
+    --ds-color-bubble-own-foreground: oklch(0.22 0.02 155);
+    --ds-color-bubble-own-muted: oklch(0.42 0.04 155);
+    --ds-color-bubble-own-accent: oklch(0.45 0.13 155);
+
     /* Brand */
     --ds-color-primary: oklch(0.5 0.13 155);
     --ds-color-primary-foreground: oklch(0.99 0 0);

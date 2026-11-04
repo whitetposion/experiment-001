@@ -1,6 +1,8 @@
 import { createAppSelector, type RootState } from '@/app/hooks'
-import { selectCurrentUserId } from '@/features/presence'
+import { selectCurrentUserId, selectUserEntities } from '@/features/presence'
+import { isSameDay } from '@/lib/calendar'
 import type { ConversationId, MessageId } from '@/types/ids'
+import type { Message } from '@/types/message'
 import { EMPTY_THREAD, messagesAdapter } from './slice'
 
 const adapterSelectors = messagesAdapter.getSelectors((state: RootState) => state.messages)
@@ -61,5 +63,90 @@ export const selectReactionSummary = createAppSelector(
     }
 
     return [...summaries.values()]
+  },
+)
+
+/** Messages this close together from one sender read as a single run. */
+const RUN_WINDOW_MS = 5 * 60_000
+
+function isSameRun(previous: Message, message: Message) {
+  const gap = new Date(message.createdAt).getTime() - new Date(previous.createdAt).getTime()
+
+  return (
+    previous.senderId === message.senderId &&
+    gap < RUN_WINDOW_MS &&
+    isSameDay(previous.createdAt, message.createdAt)
+  )
+}
+
+export interface ReplyPreview {
+  /** Null when the original message has not been loaded. */
+  readonly senderName: string | null
+  readonly text: string
+}
+
+export interface MessageView {
+  readonly message: Message
+  readonly isOwn: boolean
+  readonly senderName: string
+  readonly isRunStart: boolean
+  readonly startsNewDay: boolean
+  readonly reply: ReplyPreview | null
+  readonly reactions: readonly ReactionSummary[]
+}
+
+const selectPreviousMessage = (
+  state: RootState,
+  _messageId: MessageId,
+  previousMessageId: MessageId | undefined,
+) => (previousMessageId ? selectMessageById(state, previousMessageId) : undefined)
+
+/**
+ * Everything one bubble renders, from a single subscription. It only returns a new object
+ * when this message, the one before it, or the message it replies to changes.
+ */
+export const selectMessageView = createAppSelector(
+  [
+    selectMessageById,
+    selectPreviousMessage,
+    selectReplyTarget,
+    selectReactionSummary,
+    selectUserEntities,
+    selectCurrentUserId,
+  ],
+  (message, previous, replyTarget, reactions, users, currentUserId): MessageView | null => {
+    if (!message) {
+      return null
+    }
+
+    const nameOf = (sender: Message) =>
+      sender.senderId === currentUserId
+        ? 'You'
+        : (users[sender.senderId]?.displayName ?? 'Unknown contact')
+
+    function replyPreview(): ReplyPreview | null {
+      if (!message?.replyToMessageId) {
+        return null
+      }
+
+      if (!replyTarget) {
+        return { senderName: null, text: 'Original message' }
+      }
+
+      return {
+        senderName: nameOf(replyTarget),
+        text: replyTarget.state === 'active' ? replyTarget.text : 'This message was deleted',
+      }
+    }
+
+    return {
+      message,
+      isOwn: message.senderId === currentUserId,
+      senderName: nameOf(message),
+      isRunStart: !previous || !isSameRun(previous, message),
+      startsNewDay: !previous || !isSameDay(previous.createdAt, message.createdAt),
+      reply: replyPreview(),
+      reactions,
+    }
   },
 )

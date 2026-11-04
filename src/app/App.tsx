@@ -1,10 +1,7 @@
 import { useAppSelector } from '@/app/hooks'
 import { AppShell } from '@/components/layout/AppShell'
-import {
-  ConversationPlaceholder,
-  ConversationSidebar,
-  selectSelectedConversationId,
-} from '@/features/conversations'
+import { ChatWindow } from '@/features/chat'
+import { ConversationSidebar, selectSelectedConversationId } from '@/features/conversations'
 
 export function App() {
   const selectedId = useAppSelector(selectSelectedConversationId)
@@ -12,7 +9,7 @@ export function App() {
   return (
     <AppShell
       isMainActive={selectedId !== null}
-      main={<ConversationPlaceholder />}
+      main={<ChatWindow />}
       mainLabel="Conversation"
       sidebar={<ConversationSidebar />}
       title="Chats"

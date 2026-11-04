@@ -1,5 +1,5 @@
-import { Ban, Check, CheckCheck, CircleAlert, Clock } from 'lucide-react'
-import { memo, type ReactNode } from 'react'
+import { Ban } from 'lucide-react'
+import { memo } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { Badge } from '@/components/ui/Badge'
 import {
@@ -10,25 +10,11 @@ import {
   selectUnreadCount,
 } from '@/features/conversations/state/selectors'
 import { openConversation } from '@/features/conversations/state/workflows'
+import { MessageStatusIndicator } from '@/features/messages'
 import { cn } from '@/lib/cn'
 import { formatConversationTime } from '@/lib/formatConversationTime'
 import type { ConversationId } from '@/types/ids'
-import type { MessageDeliveryStatus } from '@/types/message'
 import { ConversationAvatar } from './ConversationAvatar'
-
-const DELIVERY_ICONS: Record<MessageDeliveryStatus, { icon: ReactNode; label: string }> = {
-  sending: { icon: <Clock aria-hidden="true" className="size-4" />, label: 'Sending' },
-  sent: { icon: <Check aria-hidden="true" className="size-4" />, label: 'Sent' },
-  delivered: { icon: <CheckCheck aria-hidden="true" className="size-4" />, label: 'Delivered' },
-  read: {
-    icon: <CheckCheck aria-hidden="true" className="size-4 text-primary" />,
-    label: 'Read',
-  },
-  failed: {
-    icon: <CircleAlert aria-hidden="true" className="size-4 text-destructive" />,
-    label: 'Failed to send',
-  },
-}
 
 /** Separates parts of the row for screen readers, which would otherwise run words together. */
 function Pause() {
@@ -51,6 +37,8 @@ export const ConversationItem = memo(function ConversationItem({
   )
   const isOnline = useAppSelector((state) => selectIsDirectContactOnline(state, conversationId))
   const hasUnread = unreadCount > 0
+  // The selected background needs its own text color to stay readable in every theme.
+  const quietText = isSelected ? 'text-secondary-foreground' : 'text-muted-foreground'
 
   return (
     <li>
@@ -59,7 +47,7 @@ export const ConversationItem = memo(function ConversationItem({
         className={cn(
           'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors duration-fast',
           'focus-visible:outline-2 focus-visible:-outline-offset-2',
-          isSelected ? 'bg-muted' : 'hover:bg-muted/60',
+          isSelected ? 'bg-secondary' : 'hover:bg-muted',
         )}
         onClick={() => {
           void dispatch(openConversation(conversationId))
@@ -78,7 +66,7 @@ export const ConversationItem = memo(function ConversationItem({
               <time
                 className={cn(
                   'shrink-0 text-xs tabular-nums',
-                  hasUnread ? 'font-medium text-primary' : 'text-muted-foreground',
+                  hasUnread && !isSelected ? 'font-medium text-primary' : quietText,
                 )}
                 dateTime={preview.sentAt}
               >
@@ -87,12 +75,12 @@ export const ConversationItem = memo(function ConversationItem({
               </time>
             ) : null}
           </span>
-          <span className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span className={cn('flex items-center gap-2 text-sm', quietText)}>
             {preview?.deliveryStatus ? (
-              <span className="shrink-0">
-                {DELIVERY_ICONS[preview.deliveryStatus].icon}
-                <span className="sr-only">{DELIVERY_ICONS[preview.deliveryStatus].label}, </span>
-              </span>
+              <MessageStatusIndicator
+                readClassName="text-primary"
+                status={preview.deliveryStatus}
+              />
             ) : null}
             {preview?.isDeleted ? <Ban aria-hidden="true" className="size-4 shrink-0" /> : null}
             <span className={cn('min-w-0 flex-1 truncate', preview?.isDeleted && 'italic')}>

@@ -1,7 +1,13 @@
 import { shallowEqual } from 'react-redux'
 import { createAppSelector, type RootState } from '@/app/hooks'
 import { selectMessageById } from '@/features/messages'
-import { selectCurrentUserId, selectIsUserOnline, selectUserEntities } from '@/features/presence'
+import {
+  selectCurrentUserId,
+  selectIsUserOnline,
+  selectUserEntities,
+  selectUserPresence,
+} from '@/features/presence'
+import { formatConversationTime } from '@/lib/formatConversationTime'
 import type { Conversation, ConversationFilter } from '@/types/conversation'
 import type { ConversationId, UserId } from '@/types/ids'
 import type { MessageDeliveryStatus } from '@/types/message'
@@ -136,6 +142,28 @@ export const selectIsDirectContactOnline = (state: RootState, conversationId: Co
 
   const otherId = otherParticipantId(conversation, selectCurrentUserId(state))
   return otherId ? selectIsUserOnline(state, otherId) : false
+}
+
+/** What the chat header shows under the title. A string, so it only updates when it changes. */
+export const selectConversationSubtitle = (state: RootState, conversationId: ConversationId) => {
+  const conversation = selectConversationById(state, conversationId)
+
+  if (!conversation) {
+    return ''
+  }
+
+  if (conversation.type === 'group') {
+    return `${String(conversation.participantIds.length)} members`
+  }
+
+  const otherId = otherParticipantId(conversation, selectCurrentUserId(state))
+  const presence = otherId ? selectUserPresence(state, otherId) : undefined
+
+  if (presence?.status === 'online') {
+    return 'Online'
+  }
+
+  return presence?.lastSeenAt ? `Last seen ${formatConversationTime(presence.lastSeenAt)}` : ''
 }
 
 export const selectCanManageMembers = (state: RootState, conversationId: ConversationId) => {

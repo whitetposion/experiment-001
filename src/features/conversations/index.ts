@@ -1,4 +1,4 @@
-export { ConversationPlaceholder } from './components/ConversationPlaceholder'
+export { ConversationAvatar } from './components/ConversationAvatar'
 export { ConversationSidebar } from './components/ConversationSidebar'
 export {
   selectAllConversations,
@@ -11,6 +11,7 @@ export {
   selectConversationSearchQuery,
   selectConversationsError,
   selectConversationsStatus,
+  selectConversationSubtitle,
   selectConversationTitle,
   selectIsDirectContactOnline,
   selectParticipants,
