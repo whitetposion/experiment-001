@@ -25,7 +25,7 @@ export function Tooltip({ align, children, className, content, side, ...props }:
       <TooltipPrimitive.Portal>
         <TooltipPrimitive.Content
           className={cn(
-            'z-50 max-w-xs animate-fade-in rounded-md bg-foreground px-2 py-1 text-xs text-background shadow-md',
+            'z-50 max-w-xs animate-fade-in rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md',
             className,
           )}
           collisionPadding={8}

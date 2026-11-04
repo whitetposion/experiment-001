@@ -88,6 +88,10 @@ components already use `bg-surface` and `backdrop-blur-surface`.
 Foreground tokens must meet 4.5:1 contrast against their paired background, and
 `border-strong` and `ring` must meet 3:1.
 
+Shadows are built from `--ds-shadow-color`, `--ds-shadow-edge` and `--ds-shadow-ring`. Black shadows
+barely show on dark surfaces, so dark themes also set the edge, a thin top highlight, and the ring,
+a faint outline.
+
 ## Customizing components
 
 Component tokens exist for families that themes commonly restyle on their own: controls and panels.

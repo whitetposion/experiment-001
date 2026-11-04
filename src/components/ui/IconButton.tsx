@@ -17,7 +17,7 @@ export function IconButton({
   return (
     <Button
       aria-label={label}
-      className={cn('aspect-square px-0', className)}
+      className={cn('aspect-square rounded-pill px-0', className)}
       loading={loading}
       variant={variant}
       {...props}

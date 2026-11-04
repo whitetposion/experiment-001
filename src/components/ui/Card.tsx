@@ -31,7 +31,12 @@ export interface CardTitleProps extends ComponentProps<'h3'> {
 }
 
 export function CardTitle({ as: Heading = 'h3', className, ...props }: CardTitleProps) {
-  return <Heading className={cn('font-heading text-lg font-semibold', className)} {...props} />
+  return (
+    <Heading
+      className={cn('font-heading text-lg font-semibold tracking-tight', className)}
+      {...props}
+    />
+  )
 }
 
 export function CardDescription({ className, ...props }: ComponentProps<'p'>) {

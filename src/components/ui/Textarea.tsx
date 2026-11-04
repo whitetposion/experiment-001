@@ -12,7 +12,7 @@ export function Textarea({ autoResize = false, className, ...props }: TextareaPr
     <textarea
       className={cn(
         fieldClasses,
-        'min-h-control px-control-x py-2',
+        'min-h-control rounded-lg px-control-x py-3',
         autoResize ? 'field-sizing-content resize-none' : 'resize-y',
         className,
       )}

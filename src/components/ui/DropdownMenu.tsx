@@ -33,7 +33,7 @@ export function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         className={cn(
           'z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-48 animate-scale-in overflow-y-auto',
-          'rounded-lg border bg-surface-elevated p-1 text-surface-elevated-foreground shadow-lg backdrop-blur-panel',
+          'rounded-lg border bg-surface-elevated p-1.5 text-surface-elevated-foreground shadow-lg backdrop-blur-panel',
           className,
         )}
         collisionPadding={collisionPadding}
@@ -45,7 +45,7 @@ export function DropdownMenuContent({
 }
 
 const itemClasses = [
-  'relative flex min-h-control-sm cursor-default items-center gap-2 rounded-sm px-2 text-sm outline-none select-none',
+  'relative flex min-h-control-sm cursor-default items-center gap-2 rounded-md px-3 text-sm outline-none select-none',
   'data-disabled:pointer-events-none data-disabled:opacity-disabled',
   '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
 ]
@@ -76,7 +76,7 @@ export function DropdownMenuItem({ className, variant, ...props }: DropdownMenuI
   )
 }
 
-const indicatorClasses = 'absolute left-2 flex size-4 items-center justify-center'
+const indicatorClasses = 'absolute left-3 flex size-4 items-center justify-center'
 
 export function DropdownMenuCheckboxItem({
   children,
@@ -85,7 +85,7 @@ export function DropdownMenuCheckboxItem({
 }: ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>) {
   return (
     <DropdownMenuPrimitive.CheckboxItem
-      className={cn(itemClasses, 'pl-8 data-highlighted:bg-muted', className)}
+      className={cn(itemClasses, 'pl-9 data-highlighted:bg-muted', className)}
       {...props}
     >
       <span className={indicatorClasses}>
@@ -105,7 +105,7 @@ export function DropdownMenuRadioItem({
 }: ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) {
   return (
     <DropdownMenuPrimitive.RadioItem
-      className={cn(itemClasses, 'pl-8 data-highlighted:bg-muted', className)}
+      className={cn(itemClasses, 'pl-9 data-highlighted:bg-muted', className)}
       {...props}
     >
       <span className={indicatorClasses}>

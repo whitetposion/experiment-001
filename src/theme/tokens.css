@@ -9,28 +9,28 @@
     --ds-color-scheme: light;
 
     /* Backgrounds and foregrounds */
-    --ds-color-background: oklch(0.985 0.002 250);
-    --ds-color-foreground: oklch(0.21 0.02 260);
-    --ds-color-muted: oklch(0.955 0.005 250);
-    --ds-color-muted-foreground: oklch(0.48 0.02 260);
+    --ds-color-background: oklch(0.975 0.003 165);
+    --ds-color-foreground: oklch(0.2 0.008 165);
+    --ds-color-muted: oklch(0.945 0.004 165);
+    --ds-color-muted-foreground: oklch(0.46 0.01 165);
 
     /* Surfaces */
     --ds-color-surface: oklch(1 0 0);
-    --ds-color-surface-foreground: oklch(0.21 0.02 260);
+    --ds-color-surface-foreground: oklch(0.2 0.008 165);
     --ds-color-surface-elevated: oklch(1 0 0);
-    --ds-color-surface-elevated-foreground: oklch(0.21 0.02 260);
-    --ds-color-overlay: oklch(0.21 0.02 260 / 0.5);
+    --ds-color-surface-elevated-foreground: oklch(0.2 0.008 165);
+    --ds-color-overlay: oklch(0.18 0.01 165 / 0.45);
 
     /* Brand */
-    --ds-color-primary: oklch(0.49 0.2 275);
-    --ds-color-primary-foreground: oklch(0.985 0 0);
-    --ds-color-secondary: oklch(0.93 0.01 265);
-    --ds-color-secondary-foreground: oklch(0.3 0.03 265);
-    --ds-color-accent: oklch(0.93 0.04 190);
-    --ds-color-accent-foreground: oklch(0.3 0.06 190);
+    --ds-color-primary: oklch(0.5 0.13 155);
+    --ds-color-primary-foreground: oklch(0.99 0 0);
+    --ds-color-secondary: oklch(0.93 0.005 165);
+    --ds-color-secondary-foreground: oklch(0.24 0.01 165);
+    --ds-color-accent: oklch(0.93 0.05 160);
+    --ds-color-accent-foreground: oklch(0.32 0.08 160);
 
     /* States */
-    --ds-color-success: oklch(0.48 0.12 155);
+    --ds-color-success: oklch(0.48 0.12 145);
     --ds-color-success-foreground: oklch(0.985 0 0);
     --ds-color-warning: oklch(0.8 0.15 80);
     --ds-color-warning-foreground: oklch(0.25 0.05 80);
@@ -40,13 +40,16 @@
     --ds-color-info-foreground: oklch(0.985 0 0);
 
     /* Borders */
-    --ds-color-border: oklch(0.91 0.005 260);
-    --ds-color-border-strong: oklch(0.6 0.015 260);
-    --ds-color-ring: oklch(0.55 0.2 275);
+    --ds-color-border: oklch(0.2 0.01 165 / 0.1);
+    --ds-color-border-strong: oklch(0.2 0.01 165 / 0.5);
+    --ds-color-ring: oklch(0.52 0.14 155);
     --ds-border-width: 1px;
 
     /* Shadows */
-    --ds-shadow-color: oklch(0.2 0.02 260 / 0.1);
+    --ds-shadow-color: oklch(0.2 0.02 165 / 0.12);
+
+    --ds-shadow-edge: oklch(1 0 0 / 0);
+    --ds-shadow-ring: oklch(0.2 0.01 165 / 0.05);
 
     /* Gradients */
     --ds-gradient-backdrop: none;
@@ -78,10 +81,10 @@
     --ds-spacing-section: 1.5rem;
 
     /* Border radius */
-    --ds-radius-sm: 0.25rem;
-    --ds-radius-md: 0.5rem;
-    --ds-radius-lg: 0.75rem;
-    --ds-radius-xl: 1rem;
+    --ds-radius-sm: 0.5rem;
+    --ds-radius-md: 0.75rem;
+    --ds-radius-lg: 1.25rem;
+    --ds-radius-xl: 1.75rem;
     --ds-radius-pill: 9999px;
 
     /* Motion */
@@ -106,9 +109,13 @@
    */
   :root,
   [data-theme] {
-    --ds-shadow-sm: 0 1px 2px var(--ds-shadow-color);
-    --ds-shadow-md: 0 2px 8px var(--ds-shadow-color);
-    --ds-shadow-lg: 0 8px 24px var(--ds-shadow-color);
+    --ds-shadow-sm: inset 0 1px 0 var(--ds-shadow-edge), 0 1px 2px var(--ds-shadow-color);
+    --ds-shadow-md:
+      inset 0 1px 0 var(--ds-shadow-edge), 0 0 0 1px var(--ds-shadow-ring),
+      0 1px 2px var(--ds-shadow-color), 0 6px 16px var(--ds-shadow-color);
+    --ds-shadow-lg:
+      inset 0 1px 0 var(--ds-shadow-edge), 0 0 0 1px var(--ds-shadow-ring),
+      0 2px 6px var(--ds-shadow-color), 0 18px 48px var(--ds-shadow-color);
   }
 
   @media (prefers-reduced-motion: reduce) {

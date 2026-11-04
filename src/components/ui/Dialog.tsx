@@ -21,7 +21,7 @@ const dialogContentVariants = cva(
   [
     'fixed top-1/2 left-1/2 z-50 flex -translate-x-1/2 -translate-y-1/2 animate-scale-in flex-col gap-4',
     'max-h-[calc(100dvh-2*var(--ds-spacing-gutter))] w-[calc(100%-2*var(--ds-spacing-gutter))] overflow-y-auto',
-    'rounded-panel bg-surface-elevated p-panel text-surface-elevated-foreground shadow-lg backdrop-blur-panel',
+    'rounded-panel border bg-surface-elevated p-panel text-surface-elevated-foreground shadow-lg backdrop-blur-panel',
   ],
   {
     variants: {
@@ -55,7 +55,7 @@ export function DialogContent({
 }: DialogContentProps) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade-in bg-overlay" />
+      <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade-in bg-overlay backdrop-blur-sm" />
       <DialogPrimitive.Content
         className={cn(dialogContentVariants({ size }), className)}
         {...props}
@@ -63,7 +63,7 @@ export function DialogContent({
         {children}
         {hideClose ? null : (
           <DialogPrimitive.Close asChild>
-            <IconButton className="absolute top-2 right-2" label={closeLabel} size="sm">
+            <IconButton className="absolute top-3 right-3" label={closeLabel} size="sm">
               <X aria-hidden="true" />
             </IconButton>
           </DialogPrimitive.Close>
@@ -89,7 +89,7 @@ export function DialogFooter({ className, ...props }: ComponentProps<'div'>) {
 export function DialogTitle({ className, ...props }: ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={cn('font-heading text-lg font-semibold', className)}
+      className={cn('font-heading text-lg font-semibold tracking-tight', className)}
       {...props}
     />
   )

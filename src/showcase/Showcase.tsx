@@ -57,7 +57,7 @@ const BADGE_VARIANTS = [
 function Section({ children, title }: { children: ReactNode; title: string }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-heading text-lg font-semibold">{title}</h2>
+      <h2 className="font-heading text-lg font-semibold tracking-tight">{title}</h2>
       {children}
     </section>
   )
@@ -89,7 +89,7 @@ export function Showcase({ initialTheme }: { initialTheme: ShowcaseTheme }) {
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-section p-gutter">
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-heading text-2xl font-bold">Component showcase</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-tight">Component showcase</h1>
         <div aria-label="Theme" className="flex gap-2" role="group">
           {THEMES.map((option) => (
             <Button
@@ -106,6 +106,40 @@ export function Showcase({ initialTheme }: { initialTheme: ShowcaseTheme }) {
           ))}
         </div>
       </header>
+
+      <Section title="Composition">
+        <div className="grid items-start gap-section md:grid-cols-2">
+          <div className="flex flex-col gap-3">
+            <Row>
+              <IconButton label="More options" variant="outline">
+                <EllipsisVertical aria-hidden="true" />
+              </IconButton>
+              <span className="flex-1 text-center font-semibold">Contacts</span>
+              <IconButton label="New contact" variant="primary">
+                <Plus aria-hidden="true" />
+              </IconButton>
+            </Row>
+            <div className="relative">
+              <Search
+                aria-hidden="true"
+                className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input aria-label="Search contacts" className="pl-10" placeholder="Search" />
+            </div>
+          </div>
+          <Card className="items-center text-center">
+            <Avatar alt="Northwind Studio" fallback="NS" size="xl" />
+            <CardHeader>
+              <CardTitle>Northwind Studio</CardTitle>
+              <CardDescription>Business account · Joined in March 2026</CardDescription>
+            </CardHeader>
+            <div className="flex w-full flex-col gap-2">
+              <Button variant="secondary">View profile</Button>
+              <Button variant="secondary">Mute</Button>
+            </div>
+          </Card>
+        </div>
+      </Section>
 
       <Section title="Button">
         {SIZES.map((size) => (

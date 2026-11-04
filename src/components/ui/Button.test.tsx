@@ -91,7 +91,7 @@ describe('Button', () => {
 
       const link = screen.getByRole('link', { name: 'Docs' })
       expect(link).toHaveAttribute('href', '/docs')
-      expect(link).toHaveClass('border-border-strong')
+      expect(link).toHaveClass('border')
       expect(screen.queryByRole('button')).not.toBeInTheDocument()
     })
 

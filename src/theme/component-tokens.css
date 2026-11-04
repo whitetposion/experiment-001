@@ -12,11 +12,11 @@
     --ds-control-height: 2.75rem;
     --ds-control-height-lg: 3rem;
     --ds-control-padding-x: 1rem;
-    --ds-control-radius: var(--ds-radius-md);
+    --ds-control-radius: var(--ds-radius-pill);
 
     /* Cards, dialogs and other contained panels */
-    --ds-panel-padding: var(--ds-spacing-gutter);
-    --ds-panel-radius: var(--ds-radius-lg);
+    --ds-panel-padding: 1.5rem;
+    --ds-panel-radius: var(--ds-radius-xl);
     --ds-panel-shadow: var(--ds-shadow-md);
     --ds-panel-blur: var(--ds-surface-blur);
   }

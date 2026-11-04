@@ -15,7 +15,7 @@ const avatarVariants = cva(
       },
       shape: {
         circle: 'rounded-pill',
-        square: 'rounded-md',
+        square: 'rounded-lg',
       },
     },
     defaultVariants: {
