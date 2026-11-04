@@ -1,7 +1,11 @@
+export { ConversationPlaceholder } from './components/ConversationPlaceholder'
+export { ConversationSidebar } from './components/ConversationSidebar'
 export {
   selectAllConversations,
   selectCanManageMembers,
+  selectConversationAvatarUrl,
   selectConversationById,
+  selectConversationCount,
   selectConversationFilter,
   selectConversationPreview,
   selectConversationSearchQuery,

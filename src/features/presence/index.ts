@@ -1,5 +1,6 @@
 export {
   selectAllUsers,
+  selectCurrentUser,
   selectCurrentUserId,
   selectDirectoryError,
   selectDirectoryStatus,

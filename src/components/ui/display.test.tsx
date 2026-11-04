@@ -13,6 +13,14 @@ describe('Avatar', () => {
     expect(screen.getByText('AR')).toHaveAttribute('aria-hidden', 'true')
   })
 
+  it('is hidden as decoration when alt is empty', () => {
+    render(<Avatar alt="" data-testid="avatar" fallback="AR" />)
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(screen.getByTestId('avatar')).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.getByTestId('avatar')).not.toHaveAttribute('aria-label')
+  })
+
   it('shows the fallback while an image has not loaded', () => {
     render(<Avatar alt="Asha Rao" fallback="AR" src="/asha.png" />)
 

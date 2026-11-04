@@ -12,6 +12,11 @@ export const selectAllUsers = userSelectors.selectAll
 
 export const selectCurrentUserId = (state: RootState) => state.presence.currentUserId
 
+export const selectCurrentUser = (state: RootState) => {
+  const currentUserId = selectCurrentUserId(state)
+  return currentUserId ? userSelectors.selectById(state, currentUserId) : undefined
+}
+
 export const selectDirectoryStatus = (state: RootState) => state.presence.status
 export const selectDirectoryError = (state: RootState) => state.presence.error
 

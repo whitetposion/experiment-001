@@ -20,6 +20,8 @@ const UNKNOWN_CONTACT = 'Unknown contact'
 export const selectConversationById = adapterSelectors.selectById
 export const selectAllConversations = adapterSelectors.selectAll
 
+export const selectConversationCount = adapterSelectors.selectTotal
+
 export const selectSelectedConversationId = (state: RootState) =>
   state.conversations.selectedConversationId
 export const selectConversationSearchQuery = (state: RootState) => state.conversations.searchQuery
@@ -56,6 +58,18 @@ export const selectConversationTitle = (state: RootState, conversationId: Conver
   return conversation
     ? titleOf(conversation, selectUserEntities(state), selectCurrentUserId(state))
     : UNKNOWN_CONTACT
+}
+
+/** A group's own avatar, or the other person's in a direct conversation. */
+export const selectConversationAvatarUrl = (state: RootState, conversationId: ConversationId) => {
+  const conversation = selectConversationById(state, conversationId)
+
+  if (conversation?.type !== 'direct') {
+    return conversation?.avatarUrl ?? null
+  }
+
+  const otherId = otherParticipantId(conversation, selectCurrentUserId(state))
+  return (otherId && selectUserEntities(state)[otherId]?.avatarUrl) ?? null
 }
 
 function matchesFilter(conversation: Conversation, filter: ConversationFilter) {

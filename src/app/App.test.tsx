@@ -1,12 +1,55 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { renderWithProviders } from '@/test/render'
+import { createTestStore } from '@/test/store'
 import { App } from './App'
+import { bootstrapApp } from './bootstrap'
+
+async function renderApp() {
+  const { store } = createTestStore()
+  await store.dispatch(bootstrapApp())
+  renderWithProviders(<App />, { store })
+  return { user: userEvent.setup() }
+}
+
+const sidebarPanel = () => screen.getByRole('navigation', { name: 'Chats' }).parentElement
+const conversationPanel = () => screen.getByRole('region', { name: 'Conversation' })
 
 describe('App', () => {
-  it('renders the main landmark inside the app providers', () => {
-    renderWithProviders(<App />)
+  it('keeps the main landmark and page heading around both panels', async () => {
+    await renderApp()
+    const main = screen.getByRole('main')
 
-    expect(screen.getByRole('main')).toBeInTheDocument()
+    expect(main).not.toHaveClass('hidden')
+    expect(within(main).getByRole('heading', { level: 1, name: 'Chats' })).toBeInTheDocument()
+    expect(main).toContainElement(screen.getByRole('navigation', { name: 'Chats' }))
+    expect(main).toContainElement(conversationPanel())
+    expect(conversationPanel()).toHaveTextContent('Select a chat to start messaging.')
+  })
+
+  it('shows only the sidebar on a phone until a chat is opened', async () => {
+    await renderApp()
+
+    expect(sidebarPanel()).not.toHaveClass('hidden')
+    expect(conversationPanel()).toHaveClass('hidden')
+  })
+
+  it('swaps panels when a chat opens, and back again, keeping the landmark', async () => {
+    const { user } = await renderApp()
+
+    await user.click(screen.getByRole('button', { name: /Rohan Desai/ }))
+
+    expect(sidebarPanel()).toHaveClass('hidden')
+    expect(conversationPanel()).not.toHaveClass('hidden')
+    expect(screen.getByRole('main')).not.toHaveClass('hidden')
+    expect(
+      within(conversationPanel()).getByRole('heading', { name: 'Rohan Desai' }),
+    ).toBeInTheDocument()
+
+    await user.click(within(conversationPanel()).getByRole('button', { name: 'Back to chats' }))
+
+    expect(conversationPanel()).toHaveClass('hidden')
+    expect(sidebarPanel()).not.toHaveClass('hidden')
   })
 })

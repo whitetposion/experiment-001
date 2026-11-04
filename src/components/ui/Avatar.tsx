@@ -27,7 +27,10 @@ const avatarVariants = cva(
 
 export interface AvatarProps
   extends ComponentProps<typeof AvatarPrimitive.Root>, VariantProps<typeof avatarVariants> {
-  /** Accessible name, announced whether the image or the fallback is showing. */
+  /**
+   * Accessible name, announced whether the image or the fallback is showing. Pass an empty
+   * string when a visible name sits beside the avatar, and it is hidden as decoration.
+   */
   alt: string
   /** Shown while the image loads, if it fails, or when there is no image. */
   fallback: ReactNode
@@ -37,9 +40,10 @@ export interface AvatarProps
 export function Avatar({ alt, className, fallback, shape, size, src, ...props }: AvatarProps) {
   return (
     <AvatarPrimitive.Root
-      aria-label={alt}
+      aria-hidden={alt ? undefined : true}
+      aria-label={alt || undefined}
       className={cn(avatarVariants({ shape, size }), className)}
-      role="img"
+      role={alt ? 'img' : undefined}
       {...props}
     >
       {src ? <AvatarPrimitive.Image alt="" className="size-full object-cover" src={src} /> : null}
