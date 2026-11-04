@@ -1,0 +1,15 @@
+@layer base {
+  :root {
+    color-scheme: var(--ds-color-scheme);
+  }
+
+  body {
+    @apply bg-background bg-backdrop font-sans text-foreground;
+  }
+
+  *,
+  ::before,
+  ::after {
+    @apply border-border outline-ring;
+  }
+}

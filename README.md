@@ -48,6 +48,11 @@ src/
 Git does not track empty folders, so a folder with no code yet holds a `.gitkeep`. Delete it when
 the first real file lands.
 
+## Design tokens
+
+Components use semantic tokens, never hardcoded colors. See
+[docs/design-tokens.md](docs/design-tokens.md).
+
 ## Import conventions
 
 ESLint enforces these rules, so `npm run lint` fails on a violation.

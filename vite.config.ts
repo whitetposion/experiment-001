@@ -16,5 +16,7 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     restoreMocks: true,
+    // Vitest empties CSS imports by default, which would blank the token contract test.
+    css: { include: [/\/src\/theme\//] },
   },
 })

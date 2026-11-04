@@ -1,0 +1,116 @@
+/*
+ * Tier 3: the Tailwind bridge.
+ *
+ * Maps --ds-* tokens into Tailwind's theme namespaces, which is what generates the
+ * utility classes. `inline` writes var(--ds-*) straight into each utility, so overrides
+ * apply wherever they are set. Plain @theme would resolve the value once on :root.
+ *
+ * The default scales are cleared, so only tokens produce utilities. Breakpoints stay
+ * static because media queries cannot read custom properties.
+ */
+@theme inline {
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+  --blur-*: initial;
+  --ease-*: initial;
+
+  /* Colors */
+  --color-background: var(--ds-color-background);
+  --color-foreground: var(--ds-color-foreground);
+  --color-muted: var(--ds-color-muted);
+  --color-muted-foreground: var(--ds-color-muted-foreground);
+  --color-surface: var(--ds-color-surface);
+  --color-surface-foreground: var(--ds-color-surface-foreground);
+  --color-surface-elevated: var(--ds-color-surface-elevated);
+  --color-surface-elevated-foreground: var(--ds-color-surface-elevated-foreground);
+  --color-overlay: var(--ds-color-overlay);
+  --color-primary: var(--ds-color-primary);
+  --color-primary-foreground: var(--ds-color-primary-foreground);
+  --color-secondary: var(--ds-color-secondary);
+  --color-secondary-foreground: var(--ds-color-secondary-foreground);
+  --color-accent: var(--ds-color-accent);
+  --color-accent-foreground: var(--ds-color-accent-foreground);
+  --color-success: var(--ds-color-success);
+  --color-success-foreground: var(--ds-color-success-foreground);
+  --color-warning: var(--ds-color-warning);
+  --color-warning-foreground: var(--ds-color-warning-foreground);
+  --color-destructive: var(--ds-color-destructive);
+  --color-destructive-foreground: var(--ds-color-destructive-foreground);
+  --color-info: var(--ds-color-info);
+  --color-info-foreground: var(--ds-color-info-foreground);
+  --color-border: var(--ds-color-border);
+  --color-border-strong: var(--ds-color-border-strong);
+  --color-ring: var(--ds-color-ring);
+
+  /* Typography */
+  --font-sans: var(--ds-font-sans);
+  --font-heading: var(--ds-font-heading);
+  --font-mono: var(--ds-font-mono);
+  --font-weight-normal: var(--ds-font-weight-normal);
+  --font-weight-medium: var(--ds-font-weight-medium);
+  --font-weight-semibold: var(--ds-font-weight-semibold);
+  --font-weight-bold: var(--ds-font-weight-bold);
+  --text-xs: var(--ds-text-xs);
+  --text-xs--line-height: var(--ds-text-xs-line-height);
+  --text-sm: var(--ds-text-sm);
+  --text-sm--line-height: var(--ds-text-sm-line-height);
+  --text-base: var(--ds-text-base);
+  --text-base--line-height: var(--ds-text-base-line-height);
+  --text-lg: var(--ds-text-lg);
+  --text-lg--line-height: var(--ds-text-lg-line-height);
+  --text-xl: var(--ds-text-xl);
+  --text-xl--line-height: var(--ds-text-xl-line-height);
+  --text-2xl: var(--ds-text-2xl);
+  --text-2xl--line-height: var(--ds-text-2xl-line-height);
+
+  /* Spacing */
+  --spacing: var(--ds-spacing-unit);
+  --spacing-gutter: var(--ds-spacing-gutter);
+  --spacing-section: var(--ds-spacing-section);
+  --spacing-control: var(--ds-control-height);
+  --spacing-control-x: var(--ds-control-padding-x);
+  --spacing-panel: var(--ds-panel-padding);
+
+  /* Borders and radius */
+  --default-border-width: var(--ds-border-width);
+  --radius-sm: var(--ds-radius-sm);
+  --radius-md: var(--ds-radius-md);
+  --radius-lg: var(--ds-radius-lg);
+  --radius-xl: var(--ds-radius-xl);
+  --radius-pill: var(--ds-radius-pill);
+  --radius-control: var(--ds-control-radius);
+  --radius-panel: var(--ds-panel-radius);
+
+  /* Shadows */
+  --shadow-sm: var(--ds-shadow-sm);
+  --shadow-md: var(--ds-shadow-md);
+  --shadow-lg: var(--ds-shadow-lg);
+  --shadow-panel: var(--ds-panel-shadow);
+
+  /* Gradients */
+  --background-image-backdrop: var(--ds-gradient-backdrop);
+
+  /* Motion */
+  --transition-duration-fast: var(--ds-duration-fast);
+  --transition-duration-normal: var(--ds-duration-normal);
+  --transition-duration-slow: var(--ds-duration-slow);
+  --default-transition-duration: var(--ds-duration-normal);
+  --default-transition-timing-function: var(--ds-ease-standard);
+  --ease-standard: var(--ds-ease-standard);
+  --ease-emphasized: var(--ds-ease-emphasized);
+
+  /* Blur and transparency */
+  --blur-sm: var(--ds-blur-sm);
+  --blur-md: var(--ds-blur-md);
+  --blur-lg: var(--ds-blur-lg);
+  --blur-surface: var(--ds-surface-blur);
+  --blur-panel: var(--ds-panel-blur);
+  --opacity-disabled: var(--ds-opacity-disabled);
+  --opacity-subtle: var(--ds-opacity-subtle);
+}

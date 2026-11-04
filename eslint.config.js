@@ -39,6 +39,11 @@ const FEATURES = readdirSync(new URL('./src/features', import.meta.url), { withF
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
 
+// Removed palette classes generate no CSS and fail silently, so lint reports them.
+const HARDCODED_COLOR =
+  '/(^|[\\s:])(bg|text|border|ring|outline|fill|stroke|from|via|to|divide|shadow|accent|caret|decoration|placeholder)-(\\[(#|rgb|hsl|oklch|color)|(white|black|(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\\d{2,3}))|^#[\\da-fA-F]{3,8}$|^(rgb|hsl|oklch)a?\\(/'
+const HARDCODED_COLOR_MESSAGE = 'Use a semantic design token instead of a hardcoded color.'
+
 const NO_PARENT_RELATIVE = {
   regex: '^\\.\\.(/|$)',
   message: 'Use the @/ alias instead of a parent-relative import.',
@@ -121,6 +126,19 @@ export default defineConfig([
   },
   ...layerBoundaries,
   ...featureBoundaries,
+  {
+    files: ['src/{app,components,features}/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        { selector: `Literal[value=${HARDCODED_COLOR}]`, message: HARDCODED_COLOR_MESSAGE },
+        {
+          selector: `TemplateElement[value.raw=${HARDCODED_COLOR}]`,
+          message: HARDCODED_COLOR_MESSAGE,
+        },
+      ],
+    },
+  },
   {
     files: ['src/test/**/*.{ts,tsx}', 'src/**/*.test.{ts,tsx}'],
     rules: {

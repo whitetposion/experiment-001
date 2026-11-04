@@ -1,0 +1,21 @@
+/*
+ * Tier 2: component tokens.
+ *
+ * Defaults point at semantic tokens. Override one to change a family of components
+ * without touching the rest of the identity, globally or on a single subtree.
+ */
+@layer theme {
+  :root,
+  [data-theme] {
+    /* Buttons, inputs and other interactive controls */
+    --ds-control-height: 2.75rem;
+    --ds-control-padding-x: 1rem;
+    --ds-control-radius: var(--ds-radius-md);
+
+    /* Cards, dialogs and other contained panels */
+    --ds-panel-padding: var(--ds-spacing-gutter);
+    --ds-panel-radius: var(--ds-radius-lg);
+    --ds-panel-shadow: var(--ds-shadow-md);
+    --ds-panel-blur: var(--ds-surface-blur);
+  }
+}

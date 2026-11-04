@@ -1,0 +1,122 @@
+/*
+ * Tier 1: semantic tokens.
+ *
+ * This file is the token contract and the default visual identity. A theme is a
+ * block that reassigns these variables, so a new identity needs no component changes.
+ */
+@layer theme {
+  :root {
+    --ds-color-scheme: light;
+
+    /* Backgrounds and foregrounds */
+    --ds-color-background: oklch(0.985 0.002 250);
+    --ds-color-foreground: oklch(0.21 0.02 260);
+    --ds-color-muted: oklch(0.955 0.005 250);
+    --ds-color-muted-foreground: oklch(0.48 0.02 260);
+
+    /* Surfaces */
+    --ds-color-surface: oklch(1 0 0);
+    --ds-color-surface-foreground: oklch(0.21 0.02 260);
+    --ds-color-surface-elevated: oklch(1 0 0);
+    --ds-color-surface-elevated-foreground: oklch(0.21 0.02 260);
+    --ds-color-overlay: oklch(0.21 0.02 260 / 0.5);
+
+    /* Brand */
+    --ds-color-primary: oklch(0.49 0.2 275);
+    --ds-color-primary-foreground: oklch(0.985 0 0);
+    --ds-color-secondary: oklch(0.93 0.01 265);
+    --ds-color-secondary-foreground: oklch(0.3 0.03 265);
+    --ds-color-accent: oklch(0.93 0.04 190);
+    --ds-color-accent-foreground: oklch(0.3 0.06 190);
+
+    /* States */
+    --ds-color-success: oklch(0.48 0.12 155);
+    --ds-color-success-foreground: oklch(0.985 0 0);
+    --ds-color-warning: oklch(0.8 0.15 80);
+    --ds-color-warning-foreground: oklch(0.25 0.05 80);
+    --ds-color-destructive: oklch(0.52 0.2 27);
+    --ds-color-destructive-foreground: oklch(0.985 0 0);
+    --ds-color-info: oklch(0.5 0.13 240);
+    --ds-color-info-foreground: oklch(0.985 0 0);
+
+    /* Borders */
+    --ds-color-border: oklch(0.91 0.005 260);
+    --ds-color-border-strong: oklch(0.6 0.015 260);
+    --ds-color-ring: oklch(0.55 0.2 275);
+    --ds-border-width: 1px;
+
+    /* Shadows */
+    --ds-shadow-color: oklch(0.2 0.02 260 / 0.1);
+
+    /* Gradients */
+    --ds-gradient-backdrop: none;
+
+    /* Typography */
+    --ds-font-sans: ui-sans-serif, system-ui, sans-serif;
+    --ds-font-heading: ui-sans-serif, system-ui, sans-serif;
+    --ds-font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    --ds-font-weight-normal: 400;
+    --ds-font-weight-medium: 500;
+    --ds-font-weight-semibold: 600;
+    --ds-font-weight-bold: 700;
+    --ds-text-xs: 0.75rem;
+    --ds-text-xs-line-height: 1rem;
+    --ds-text-sm: 0.875rem;
+    --ds-text-sm-line-height: 1.25rem;
+    --ds-text-base: 1rem;
+    --ds-text-base-line-height: 1.5rem;
+    --ds-text-lg: 1.125rem;
+    --ds-text-lg-line-height: 1.75rem;
+    --ds-text-xl: 1.25rem;
+    --ds-text-xl-line-height: 1.75rem;
+    --ds-text-2xl: 1.5rem;
+    --ds-text-2xl-line-height: 2rem;
+
+    /* Spacing: every numeric utility is a multiple of the unit, so it sets density. */
+    --ds-spacing-unit: 0.25rem;
+    --ds-spacing-gutter: 1rem;
+    --ds-spacing-section: 1.5rem;
+
+    /* Border radius */
+    --ds-radius-sm: 0.25rem;
+    --ds-radius-md: 0.5rem;
+    --ds-radius-lg: 0.75rem;
+    --ds-radius-xl: 1rem;
+    --ds-radius-pill: 9999px;
+
+    /* Motion */
+    --ds-duration-fast: 120ms;
+    --ds-duration-normal: 200ms;
+    --ds-duration-slow: 320ms;
+    --ds-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --ds-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+
+    /* Blur and transparency: opacities are percentages so they also work as color modifiers. */
+    --ds-blur-sm: 4px;
+    --ds-blur-md: 12px;
+    --ds-blur-lg: 24px;
+    --ds-surface-blur: 0px;
+    --ds-opacity-disabled: 50%;
+    --ds-opacity-subtle: 10%;
+  }
+
+  /*
+   * Derived tokens reference other tokens. A custom property resolves on the element
+   * that declares it, so [data-theme] re-declares these to pick up scoped overrides.
+   */
+  :root,
+  [data-theme] {
+    --ds-shadow-sm: 0 1px 2px var(--ds-shadow-color);
+    --ds-shadow-md: 0 2px 8px var(--ds-shadow-color);
+    --ds-shadow-lg: 0 8px 24px var(--ds-shadow-color);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root,
+    [data-theme] {
+      --ds-duration-fast: 0ms;
+      --ds-duration-normal: 0ms;
+      --ds-duration-slow: 0ms;
+    }
+  }
+}
