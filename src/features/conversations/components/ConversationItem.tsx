@@ -46,6 +46,8 @@ export const ConversationItem = memo(function ConversationItem({
     <li>
       <button
         aria-current={isSelected ? 'true' : undefined}
+        data-conversation-id={conversationId}
+        data-list-item
         className={cn(
           'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors duration-fast',
           'focus-visible:outline-2 focus-visible:-outline-offset-2',

@@ -125,6 +125,55 @@ describe('reading', () => {
   })
 })
 
+describe('searching messages', () => {
+  it('finds messages across direct and group conversations, newest first', async () => {
+    const { messages } = await createApi().searchMessages('the')
+    const times = messages.map(({ createdAt }) => createdAt)
+    const conversations = new Set(messages.map(({ conversationId }) => conversationId))
+
+    expect(conversations).toContain(direct)
+    expect(conversations).toContain(ownedGroup)
+    expect(times).toEqual(times.toSorted().reverse())
+  })
+
+  it('ignores case and surrounding spaces', async () => {
+    const { messages } = await createApi().searchMessages('  PAYMENTS ')
+
+    expect(messages.length).toBeGreaterThan(0)
+    expect(messages.every(({ text }) => text.toLowerCase().includes('payments'))).toBe(true)
+  })
+
+  it('finds messages that are not on the newest page', async () => {
+    const { messages } = await createApi().searchMessages('Two weeks to launch')
+
+    expect(messages.map(({ id }) => id)).toEqual(['message-launch-1'])
+  })
+
+  it('leaves out deleted messages and conversations the user left', async () => {
+    const api = createApi()
+    expect((await api.searchMessages('heat')).messages).toEqual([])
+
+    await api.removeGroupMember({ conversationId: memberGroup, userId: maya })
+
+    expect((await api.searchMessages('torch')).messages).toEqual([])
+  })
+
+  it('finds a message by its edited text only', async () => {
+    const api = createApi()
+
+    await api.editMessage({ messageId: ownMessage, text: 'Marathon plans' })
+
+    expect((await api.searchMessages('marathon')).messages).toHaveLength(1)
+    expect((await api.searchMessages('Deal. 5k')).messages).toEqual([])
+  })
+
+  it('caps the number of results', async () => {
+    const { messages } = await createApi().searchMessages('e')
+
+    expect(messages.length).toBeLessThanOrEqual(50)
+  })
+})
+
 describe('sending', () => {
   it.each([
     ['direct', direct],

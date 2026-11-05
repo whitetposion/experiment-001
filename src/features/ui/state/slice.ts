@@ -12,11 +12,14 @@ export interface ComposerTarget {
 export interface UiState {
   readonly isDetailsPanelOpen: boolean
   readonly composerTarget: ComposerTarget | null
+  /** A message to scroll to and briefly highlight, such as a search result. */
+  readonly highlightedMessageId: MessageId | null
 }
 
 const initialState: UiState = {
   isDetailsPanelOpen: false,
   composerTarget: null,
+  highlightedMessageId: null,
 }
 
 export const uiSlice = createSlice({
@@ -29,12 +32,16 @@ export const uiSlice = createSlice({
     composerTargetChanged(state, action: PayloadAction<ComposerTarget | null>) {
       state.composerTarget = action.payload
     },
+    messageHighlighted(state, action: PayloadAction<MessageId | null>) {
+      state.highlightedMessageId = action.payload
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(conversationSelected, (state) => {
         state.isDetailsPanelOpen = false
         state.composerTarget = null
+        state.highlightedMessageId = null
       })
       .addCase(deleteMessage.fulfilled, (state, action) => {
         if (state.composerTarget?.messageId === action.payload.id) {
@@ -47,4 +54,4 @@ export const uiSlice = createSlice({
   },
 })
 
-export const { composerTargetChanged, detailsPanelToggled } = uiSlice.actions
+export const { composerTargetChanged, detailsPanelToggled, messageHighlighted } = uiSlice.actions

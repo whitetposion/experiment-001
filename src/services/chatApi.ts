@@ -28,6 +28,11 @@ export interface MessagePageResponse {
   readonly hasMore: boolean
 }
 
+export interface MessageSearchResponse {
+  /** Newest first. */
+  readonly messages: readonly ActiveMessage[]
+}
+
 export interface GroupMembersResponse {
   readonly conversation: GroupConversation
   /** Every participant after the change. */
@@ -97,6 +102,8 @@ export interface ChatApi {
     conversationId: ConversationId,
     options?: GetMessagesOptions,
   ): Promise<MessagePageResponse>
+  /** Searches every conversation the user is in, including messages not yet loaded. */
+  searchMessages(query: string, options?: RequestOptions): Promise<MessageSearchResponse>
   sendMessage(request: SendMessageRequest): Promise<ActiveMessage>
   editMessage(request: EditMessageRequest): Promise<ActiveMessage>
   deleteMessage(messageId: MessageId): Promise<DeletedMessage>

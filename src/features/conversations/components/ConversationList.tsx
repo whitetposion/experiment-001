@@ -75,7 +75,7 @@ function EmptyResults() {
             Clear search
           </Button>
         }
-        description="Check the spelling, or search by a person's or group's name."
+        description="No person or group has that name."
         title={`No chats match "${query}"`}
       />
     )

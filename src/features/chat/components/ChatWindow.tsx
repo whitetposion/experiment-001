@@ -1,13 +1,21 @@
 import { MessagesSquare } from 'lucide-react'
-import { useRef, type RefObject } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import {
   GroupInfoPanel,
   selectConversationById,
   selectSelectedConversationId,
+  selectUnreadMarkerId,
 } from '@/features/conversations'
 import { MessageList } from '@/features/messages'
-import { composerTargetChanged, detailsPanelToggled, selectIsDetailsPanelOpen } from '@/features/ui'
+import {
+  composerTargetChanged,
+  detailsPanelToggled,
+  messageHighlighted,
+  selectHighlightedMessageId,
+  selectIsDetailsPanelOpen,
+} from '@/features/ui'
+import { isCoarsePointer } from '@/lib/pointer'
 import type { ConversationId, MessageId } from '@/types/ids'
 import { ChatHeader } from './ChatHeader'
 import { MessageComposer } from './MessageComposer'
@@ -37,6 +45,44 @@ function ConversationDetails({
   )
 }
 
+const HIGHLIGHT_MS = 2500
+
+interface ChatMessagesProps {
+  conversationId: ConversationId
+  showSender: boolean
+  onReply: (messageId: MessageId) => void
+  onEdit: (messageId: MessageId) => void
+}
+
+/** Subscribes on its own, so a highlight does not re-render the whole chat. */
+function ChatMessages(props: ChatMessagesProps) {
+  const dispatch = useAppDispatch()
+  const highlightedMessageId = useAppSelector(selectHighlightedMessageId)
+  const unreadMarkerId = useAppSelector(selectUnreadMarkerId)
+
+  useEffect(() => {
+    if (!highlightedMessageId) {
+      return undefined
+    }
+
+    const timer = setTimeout(() => {
+      dispatch(messageHighlighted(null))
+    }, HIGHLIGHT_MS)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [dispatch, highlightedMessageId])
+
+  return (
+    <MessageList
+      {...props}
+      highlightedMessageId={highlightedMessageId}
+      unreadMarkerId={unreadMarkerId}
+    />
+  )
+}
+
 function ActiveChat({ conversationId }: { conversationId: ConversationId }) {
   const dispatch = useAppDispatch()
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -44,6 +90,13 @@ function ActiveChat({ conversationId }: { conversationId: ConversationId }) {
   const isGroup = useAppSelector(
     (state) => selectConversationById(state, conversationId)?.type === 'group',
   )
+
+  // Ready to type on opening. A touch screen would pop up its keyboard, so it waits for a tap.
+  useEffect(() => {
+    if (!isCoarsePointer()) {
+      inputRef.current?.focus()
+    }
+  }, [])
 
   function handleReply(messageId: MessageId) {
     dispatch(composerTargetChanged({ mode: 'reply', messageId }))
@@ -58,7 +111,7 @@ function ActiveChat({ conversationId }: { conversationId: ConversationId }) {
   return (
     <div className="flex h-full flex-col">
       <ChatHeader conversationId={conversationId} infoButtonRef={infoButtonRef} />
-      <MessageList
+      <ChatMessages
         conversationId={conversationId}
         onEdit={handleEdit}
         onReply={handleReply}

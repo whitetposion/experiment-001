@@ -21,6 +21,7 @@ describe('store', () => {
       'conversations',
       'messages',
       'presence',
+      'search',
       'ui',
     ])
   })

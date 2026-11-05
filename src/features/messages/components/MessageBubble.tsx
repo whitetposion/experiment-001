@@ -88,12 +88,16 @@ export interface MessageBubbleProps {
   onEdit: (messageId: MessageId) => void
   onDelete: (messageId: MessageId) => void
   onNotice: (message: string) => void
+  isFirstUnread: boolean
+  isHighlighted: boolean
 }
 
 // memo pays off here: the list re-renders for every new message, and without it every
 // bubble would re-render too. It relies on stable props, so a parent that re-renders often
 // must keep onReply stable.
 export const MessageBubble = memo(function MessageBubble({
+  isFirstUnread,
+  isHighlighted,
   messageId,
   onDelete,
   onEdit,
@@ -114,8 +118,23 @@ export const MessageBubble = memo(function MessageBubble({
   const showSenderName = showSender && !isOwn && isRunStart
 
   return (
-    <li className={cn(isRunStart ? 'mt-3' : 'mt-0.5')}>
+    <li
+      className={cn(
+        'rounded-lg transition-colors duration-slow outline-none',
+        isRunStart ? 'mt-3' : 'mt-0.5',
+        isHighlighted && 'bg-primary/subtle',
+      )}
+      data-message-id={messageId}
+      tabIndex={-1}
+    >
       {startsNewDay ? <DayDivider timestamp={message.createdAt} /> : null}
+      {isFirstUnread ? (
+        <div className="flex items-center gap-3 py-2 text-xs font-medium text-muted-foreground">
+          <span aria-hidden="true" className="h-px flex-1 bg-border-strong" />
+          Unread messages
+          <span aria-hidden="true" className="h-px flex-1 bg-border-strong" />
+        </div>
+      ) : null}
       <div className={cn('group flex items-center gap-1', isOwn && 'flex-row-reverse')}>
         {showAvatarColumn ? (
           <span className="size-8 shrink-0 self-start">

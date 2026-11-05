@@ -33,6 +33,7 @@ export const selectConversationCount = adapterSelectors.selectTotal
 
 export const selectSelectedConversationId = (state: RootState) =>
   state.conversations.selectedConversationId
+export const selectUnreadMarkerId = (state: RootState) => state.conversations.unreadMarkerId
 export const selectConversationSearchQuery = (state: RootState) => state.conversations.searchQuery
 export const selectConversationFilter = (state: RootState) => state.conversations.filter
 export const selectConversationsStatus = (state: RootState) => state.conversations.status

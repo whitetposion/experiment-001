@@ -1,5 +1,6 @@
 export { ConversationAvatar } from './components/ConversationAvatar'
 export { GroupInfoPanel } from './components/GroupInfoPanel'
+export { focusConversationRow, focusConversationSearch } from './components/focus'
 export { ConversationSidebar } from './components/ConversationSidebar'
 export {
   selectAddableUsers,
@@ -24,6 +25,7 @@ export {
   selectTotalUnreadCount,
   selectTypingLabel,
   selectUnreadCount,
+  selectUnreadMarkerId,
   selectVisibleConversationIds,
   type ConversationPreview,
   type GroupMemberView,

@@ -12,7 +12,7 @@ import type {
   ConversationFilter,
   ConversationParticipant,
 } from '@/types/conversation'
-import type { ConversationId, UserId } from '@/types/ids'
+import type { ConversationId, MessageId, UserId } from '@/types/ids'
 import type { RequestStatus } from '@/types/request'
 import {
   addGroupMembers,
@@ -36,6 +36,8 @@ export const participantsAdapter = createEntityAdapter<ConversationParticipant, 
 export interface ConversationsState extends EntityState<Conversation, ConversationId> {
   readonly participants: EntityState<ConversationParticipant, string>
   readonly selectedConversationId: ConversationId | null
+  /** Where unread messages began when this chat was opened. Reading clears unread at once. */
+  readonly unreadMarkerId: MessageId | null
   readonly searchQuery: string
   readonly filter: ConversationFilter
   readonly status: RequestStatus
@@ -45,6 +47,7 @@ export interface ConversationsState extends EntityState<Conversation, Conversati
 const initialState: ConversationsState = conversationsAdapter.getInitialState({
   participants: participantsAdapter.getInitialState(),
   selectedConversationId: null,
+  unreadMarkerId: null,
   searchQuery: '',
   filter: 'all',
   status: 'idle',
@@ -57,6 +60,10 @@ export const conversationsSlice = createSlice({
   reducers: {
     conversationSelected(state, action: PayloadAction<ConversationId | null>) {
       state.selectedConversationId = action.payload
+      state.unreadMarkerId = null
+    },
+    unreadMarkerSet(state, action: PayloadAction<MessageId>) {
+      state.unreadMarkerId = action.payload
     },
     searchQueryChanged(state, action: PayloadAction<string>) {
       state.searchQuery = action.payload
@@ -153,5 +160,10 @@ export const conversationsSlice = createSlice({
   },
 })
 
-export const { conversationLeft, conversationSelected, filterChanged, searchQueryChanged } =
-  conversationsSlice.actions
+export const {
+  conversationLeft,
+  conversationSelected,
+  filterChanged,
+  searchQueryChanged,
+  unreadMarkerSet,
+} = conversationsSlice.actions

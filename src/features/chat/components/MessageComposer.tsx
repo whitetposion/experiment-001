@@ -5,6 +5,7 @@ import { IconButton } from '@/components/ui/IconButton'
 import { Textarea } from '@/components/ui/Textarea'
 import { editMessage, selectMessageView, sendMessage } from '@/features/messages'
 import { composerTargetChanged, selectComposerTarget } from '@/features/ui'
+import { isCoarsePointer } from '@/lib/pointer'
 import type { ApiFailure } from '@/services/apiError'
 import type { ConversationId, MessageId } from '@/types/ids'
 
@@ -129,11 +130,18 @@ export function MessageComposer({ conversationId, inputRef }: MessageComposerPro
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Escape' && target) {
+      event.preventDefault()
       cancelTarget()
     }
 
     // isComposing is true while an input method is confirming text, such as Japanese.
-    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+    // On a touch screen, Return adds a line and the send button sends.
+    if (
+      event.key === 'Enter' &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing &&
+      !isCoarsePointer()
+    ) {
       event.preventDefault()
       void submit()
     }

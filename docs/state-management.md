@@ -69,7 +69,7 @@ list, and one per thread.
 Features import each other in one direction only, and `import-x/no-cycle` enforces it:
 
 ```
-chat ──▶ ui ──▶ conversations ──▶ messages ──▶ presence
+chat ──▶ search ──▶ ui ──▶ conversations ──▶ messages ──▶ presence
 ```
 
 `chat` holds no state. It composes the chat window from the features below it, which is why
@@ -165,6 +165,23 @@ extra work.
 `GroupInfoPanel` opens from `isDetailsPanelOpen` in `ui`. A small wrapper subscribes to that flag, so
 opening the panel does not re-render the chat. `selectGroupMembers` works out `canRemove` with the
 same rules the backend enforces, so the UI never offers an action that must fail.
+
+## Search
+
+The search box keeps what is being typed locally, and sends the settled query to Redux after a short
+debounce. Typing therefore re-renders only the input. The value it shows is derived, so a query
+cleared from elsewhere appears there with no effect to sync it.
+
+Chats are filtered by a selector, because all of them are loaded. Messages are searched by the
+backend, because Redux only holds loaded messages and a selector would miss the rest. A listener
+reacts to the query, cancels the previous search, and starts a new one. The slice also ignores any
+response that is not from the latest request, so results can never arrive out of order.
+
+Results are stored as IDs, and their messages live with all the others. An edit updates a result,
+and a deleted message drops out, so deleted text cannot stay on screen. Results do not refresh on
+their own when new messages arrive.
+
+`openSearchResult` loads older pages until it reaches the message, then highlights it.
 
 ## Entity adapters
 

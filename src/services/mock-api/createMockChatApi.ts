@@ -14,6 +14,7 @@ import { delay } from './delay'
 import { createMockSeed, type MockSeed } from './seed'
 
 const DEFAULT_PAGE_SIZE = 30
+const MAX_SEARCH_RESULTS = 50
 
 export interface MockChatApiOptions {
   /** Starting data. Defaults to the sample conversations. */
@@ -371,6 +372,23 @@ export function createMockChatApi({
 
         const start = Math.max(0, end - limit)
         return { messages: all.slice(start, end), hasMore: start > 0 }
+      }, options),
+
+    searchMessages: (query, options) =>
+      request(() => {
+        const needle = query.trim().toLowerCase()
+
+        return {
+          messages: [...messages.values()]
+            .filter(
+              (message): message is ActiveMessage =>
+                message.state === 'active' &&
+                membership(message.conversationId, currentUserId) !== undefined &&
+                message.text.toLowerCase().includes(needle),
+            )
+            .sort((first, second) => second.createdAt.localeCompare(first.createdAt))
+            .slice(0, MAX_SEARCH_RESULTS),
+        }
       }, options),
 
     sendMessage: ({ conversationId, replyToMessageId, text }) =>

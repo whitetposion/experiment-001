@@ -171,9 +171,11 @@ describe('search', () => {
   it('narrows the list as the user types', async () => {
     const { user } = await renderSidebar()
 
-    await user.type(screen.getByRole('searchbox', { name: 'Search chats' }), 'trek')
+    await user.type(screen.getByRole('searchbox', { name: 'Search chats and messages' }), 'trek')
 
-    expect(rows()).toHaveLength(1)
+    await waitFor(() => {
+      expect(rows()).toHaveLength(1)
+    })
     expect(rows()[0]).toHaveTextContent('Weekend Trek')
   })
 
@@ -183,16 +185,20 @@ describe('search', () => {
     await user.click(screen.getByRole('button', { name: 'Groups' }))
     await user.type(screen.getByRole('searchbox'), 'rohan')
 
-    expect(screen.getByText('No chats match "rohan"')).toBeInTheDocument()
+    expect(await screen.findByText('No chats match "rohan"')).toBeInTheDocument()
   })
 
-  it('clears from the button and returns focus to a usable state', async () => {
+  it('clears from the button and keeps focus in the search box', async () => {
     const { user } = await renderSidebar()
     await user.type(screen.getByRole('searchbox'), 'trek')
+    await waitFor(() => {
+      expect(rows()).toHaveLength(1)
+    })
 
     await user.click(screen.getByRole('button', { name: 'Clear search' }))
 
     expect(screen.getByRole('searchbox')).toHaveValue('')
+    expect(screen.getByRole('searchbox')).toHaveFocus()
     expect(rows()).toHaveLength(9)
     expect(screen.queryByRole('button', { name: 'Clear search' })).not.toBeInTheDocument()
   })
@@ -200,6 +206,7 @@ describe('search', () => {
   it('clears from the empty state', async () => {
     const { user } = await renderSidebar()
     await user.type(screen.getByRole('searchbox'), 'nobody')
+    await screen.findByText('No chats match "nobody"')
 
     const [, emptyStateButton] = screen.getAllByRole('button', { name: 'Clear search' })
 

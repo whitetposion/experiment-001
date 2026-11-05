@@ -7,16 +7,29 @@ const NEAR_BOTTOM_PX = 80
 export interface ChatScrollOptions {
   messageIds: readonly MessageId[]
   isLatestOwn: boolean
+  /** Where to open instead of the newest message, such as the first unread one. */
+  openAtMessageId?: MessageId | null
+  /** A message to bring into view and focus, such as a search result. */
+  highlightedMessageId?: MessageId | null
 }
 
 /**
  * Keeps the reader in the right place as messages change:
- * - Opening a conversation starts at the newest message.
+ * - Opening a conversation starts at the first unread message, or else the newest.
  * - A new message scrolls into view if the reader is at the end, or if they sent it.
  * - A new message leaves the reader alone if they have scrolled up to read history.
  * - Loading older messages keeps what the reader was looking at in place.
  */
-export function useChatScroll({ isLatestOwn, messageIds }: ChatScrollOptions) {
+function findMessage(scroller: HTMLElement, messageId: MessageId) {
+  return scroller.querySelector<HTMLElement>(`[data-message-id="${messageId}"]`)
+}
+
+export function useChatScroll({
+  highlightedMessageId = null,
+  isLatestOwn,
+  messageIds,
+  openAtMessageId = null,
+}: ChatScrollOptions) {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const isNearBottomRef = useRef(true)
   const previousRef = useRef({
@@ -41,14 +54,28 @@ export function useChatScroll({ isLatestOwn, messageIds }: ChatScrollOptions) {
     const gainedOlder = !wasEmpty && firstId !== previous.firstId && lastId === previous.lastId
     const gainedNewer = !wasEmpty && lastId !== previous.lastId
 
-    if (gainedOlder) {
+    const openingAt = wasEmpty && openAtMessageId ? findMessage(scroller, openAtMessageId) : null
+
+    if (openingAt) {
+      openingAt.scrollIntoView({ block: 'start' })
+    } else if (gainedOlder) {
       scroller.scrollTop += scroller.scrollHeight - previous.scrollHeight
     } else if (wasEmpty || (gainedNewer && (isNearBottomRef.current || isLatestOwn))) {
       scroller.scrollTop = scroller.scrollHeight
     }
 
     previousRef.current = { firstId, lastId, scrollHeight: scroller.scrollHeight }
-  }, [isLatestOwn, messageIds])
+  }, [isLatestOwn, messageIds, openAtMessageId])
+
+  useLayoutEffect(() => {
+    const scroller = scrollerRef.current
+    const target = scroller && highlightedMessageId && findMessage(scroller, highlightedMessageId)
+
+    if (target) {
+      target.scrollIntoView({ block: 'center' })
+      target.focus({ preventScroll: true })
+    }
+  }, [highlightedMessageId])
 
   // The list shrinks when the keyboard opens or the composer grows. Stay at the end if there.
   useEffect(() => {

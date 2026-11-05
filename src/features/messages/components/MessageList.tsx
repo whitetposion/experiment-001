@@ -48,9 +48,19 @@ export interface MessageListProps {
   showSender: boolean
   onReply: (messageId: MessageId) => void
   onEdit: (messageId: MessageId) => void
+  /** The first unread message when the chat was opened. */
+  unreadMarkerId?: MessageId | null
+  highlightedMessageId?: MessageId | null
 }
 
-export function MessageList({ conversationId, onEdit, onReply, showSender }: MessageListProps) {
+export function MessageList({
+  conversationId,
+  highlightedMessageId = null,
+  onEdit,
+  onReply,
+  showSender,
+  unreadMarkerId = null,
+}: MessageListProps) {
   const dispatch = useAppDispatch()
   const ids = useAppSelector((state) => selectThreadMessageIds(state, conversationId))
   const status = useAppSelector((state) => selectThreadStatus(state, conversationId))
@@ -61,8 +71,10 @@ export function MessageList({ conversationId, onEdit, onReply, showSender }: Mes
     latestId ? selectIsOwnMessage(state, latestId) : false,
   )
   const { handleScroll, isAwayFromBottom, scrollerRef, scrollToBottom } = useChatScroll({
+    highlightedMessageId,
     isLatestOwn,
     messageIds: ids,
+    openAtMessageId: unreadMarkerId,
   })
 
   const { notice, showNotice } = useTimedNotice()
@@ -149,6 +161,8 @@ export function MessageList({ conversationId, onEdit, onReply, showSender }: Mes
           <ol className="mt-auto">
             {ids.map((id, index) => (
               <MessageBubble
+                isFirstUnread={id === unreadMarkerId}
+                isHighlighted={id === highlightedMessageId}
                 key={id}
                 messageId={id}
                 onDelete={handleDelete}

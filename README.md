@@ -51,6 +51,17 @@ src/
 Git does not track empty folders, so a folder with no code yet holds a `.gitkeep`. Delete it when
 the first real file lands.
 
+## Keyboard shortcuts
+
+| Keys                      | Action                                  |
+| ------------------------- | --------------------------------------- |
+| `Cmd` or `Ctrl` `K`       | Focus search, from anywhere             |
+| `/`                       | Focus search, outside a text field      |
+| `Enter`                   | Send, on a keyboard                     |
+| `Shift` `Enter`           | New line                                |
+| `Escape`                  | Clear search, or cancel a reply or edit |
+| Arrow keys, `Home`, `End` | Move through chats and search results   |
+
 ## Component showcase
 
 Run `npm run dev` and open <http://localhost:5173/showcase.html> to see every design-system
@@ -104,8 +115,8 @@ ESLint enforces these rules, so `npm run lint` fails on a violation.
   feature uses its full `@/features/messages/...` path.
 - Features read Redux types and typed hooks from `@/app/hooks`, never from `@/app/store`. The store
   imports feature slices, so this keeps the dependency one-way at runtime.
-- Features depend on each other in one direction: `chat`, then `ui`, then `conversations`, then
-  `messages`, then `presence`.
+- Features depend on each other in one direction: `chat`, then `search`, then `ui`, then
+  `conversations`, then `messages`, then `presence`.
 - `app` composes features. If two features need to talk to each other, move the shared part down a
   layer or compose them in `app`. Circular imports fail lint through `import-x/no-cycle`.
 - Tests and `src/test` may import from any layer. Production code must not import `@/test`.

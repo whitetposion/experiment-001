@@ -1,10 +1,12 @@
 import { ArrowLeft, Info } from 'lucide-react'
 import type { Ref } from 'react'
+import { flushSync } from 'react-dom'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { IconButton } from '@/components/ui/IconButton'
 import {
   ConversationAvatar,
   conversationSelected,
+  focusConversationRow,
   selectConversationById,
   selectConversationSubtitle,
   selectConversationTitle,
@@ -34,7 +36,11 @@ export function ChatHeader({ conversationId, infoButtonRef }: ChatHeaderProps) {
         className="md:hidden"
         label="Back to chats"
         onClick={() => {
-          dispatch(conversationSelected(null))
+          // The row is hidden until this renders, and it needs to be visible to take focus.
+          flushSync(() => {
+            dispatch(conversationSelected(null))
+          })
+          focusConversationRow(conversationId)
         }}
       >
         <ArrowLeft aria-hidden="true" />
