@@ -11,6 +11,7 @@ export interface RemoveMemberDialogProps {
   member: GroupMemberView | null
   onClose: () => void
   onCloseAutoFocus: () => void
+  onRemoved: (name: string) => void
 }
 
 export function RemoveMemberDialog({
@@ -19,6 +20,7 @@ export function RemoveMemberDialog({
   member,
   onClose,
   onCloseAutoFocus,
+  onRemoved,
 }: RemoveMemberDialogProps) {
   const dispatch = useAppDispatch()
 
@@ -31,6 +33,7 @@ export function RemoveMemberDialog({
       onConfirm={async () => {
         if (member) {
           await dispatch(removeGroupMember({ conversationId, userId: member.userId })).unwrap()
+          onRemoved(member.name)
         }
       }}
       open={member !== null}

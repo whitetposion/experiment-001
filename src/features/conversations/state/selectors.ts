@@ -10,6 +10,7 @@ import {
   selectUserEntities,
   selectUserPresence,
 } from '@/features/presence'
+import { countLabel } from '@/lib/countLabel'
 import { formatLastSeen } from '@/lib/formatConversationTime'
 import { deletedMessageLabel, firstName, UNKNOWN_CONTACT } from '@/lib/senderLabels'
 import {
@@ -168,7 +169,7 @@ export const selectConversationSubtitle = (state: RootState, conversationId: Con
   }
 
   if (conversation.type === 'group') {
-    return `${String(conversation.participantIds.length)} members`
+    return countLabel(conversation.participantIds.length, 'member')
   }
 
   const otherId = selectDirectContactId(state, conversationId)

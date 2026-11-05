@@ -9,6 +9,7 @@ import {
   type ReplyPreview,
 } from '@/features/messages/state/selectors'
 import { cn } from '@/lib/cn'
+import { countLabel } from '@/lib/countLabel'
 import { formatMessageDay } from '@/lib/formatMessageDate'
 import { getInitials } from '@/lib/initials'
 import { deletedMessageLabel } from '@/lib/senderLabels'
@@ -59,7 +60,7 @@ function ReactionChip({
 
   return (
     <button
-      aria-label={`${emoji} ${String(count)} ${count === 1 ? 'reaction' : 'reactions'}`}
+      aria-label={`${emoji} ${countLabel(count, 'reaction')}`}
       aria-pressed={reactedByCurrentUser}
       className={cn(
         'inline-flex min-h-6 items-center gap-1 rounded-pill bg-muted px-2 text-xs font-medium',

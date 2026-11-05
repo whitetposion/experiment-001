@@ -189,6 +189,9 @@ export function MessageList({
           setPendingDeleteId(null)
         }}
         onCloseAutoFocus={restoreFocusAfterDelete}
+        onDeleted={() => {
+          showNotice('Message deleted')
+        }}
       />
 
       {isAwayFromBottom ? (

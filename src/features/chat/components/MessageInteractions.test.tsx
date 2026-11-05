@@ -57,6 +57,28 @@ async function confirmDelete(user: User, text: string) {
   })
 }
 
+describe('composer focus', () => {
+  it('stays in the text box after sending with the button', async () => {
+    const { user } = await renderChat()
+
+    await user.type(input(), 'Hello there')
+    await user.click(screen.getByRole('button', { name: 'Send message' }))
+
+    expect(await within(log()).findByText('Hello there')).toBeInTheDocument()
+    expect(input()).toHaveFocus()
+    expect(input()).toHaveValue('')
+  })
+
+  it('returns to the text box when a reply is cancelled', async () => {
+    const { user } = await renderChat()
+
+    await chooseAction(user, OTHER_TEXT, 'Reply')
+    await user.click(await screen.findByRole('button', { name: 'Cancel reply' }))
+
+    expect(input()).toHaveFocus()
+  })
+})
+
 describe('action menu', () => {
   it('offers every action on the user’s own message', async () => {
     const { user } = await renderChat()
@@ -370,6 +392,14 @@ describe('editing', () => {
 })
 
 describe('deleting', () => {
+  it('confirms that the message was deleted', async () => {
+    const { user } = await renderChat()
+
+    await confirmDelete(user, OWN_TEXT)
+
+    expect(await screen.findByText('Message deleted')).toBeInTheDocument()
+  })
+
   it('asks first, and cancelling changes nothing', async () => {
     const { store, user } = await renderChat()
     const dialog = await startDelete(user, OWN_TEXT)

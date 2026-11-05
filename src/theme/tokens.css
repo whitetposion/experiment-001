@@ -48,7 +48,7 @@
     /* Borders */
     --ds-color-border: oklch(0.2 0.01 165 / 0.1);
     --ds-color-border-strong: oklch(0.2 0.01 165 / 0.5);
-    --ds-color-ring: oklch(0.52 0.14 155);
+    --ds-color-ring: oklch(0.6 0.15 155);
     --ds-border-width: 1px;
 
     /* Shadows */

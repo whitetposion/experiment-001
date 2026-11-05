@@ -17,9 +17,10 @@ interface AddMembersValues {
 export interface AddMembersFormProps {
   conversationId: ConversationId
   onDone: () => void
+  onAdded: (count: number) => void
 }
 
-export function AddMembersForm({ conversationId, onDone }: AddMembersFormProps) {
+export function AddMembersForm({ conversationId, onAdded, onDone }: AddMembersFormProps) {
   const dispatch = useAppDispatch()
   const candidates = useAppSelector((state) => selectAddableUsers(state, conversationId))
   const [error, setError] = useState<string | null>(null)
@@ -34,13 +35,11 @@ export function AddMembersForm({ conversationId, onDone }: AddMembersFormProps) 
   async function addMembers({ userIds }: AddMembersValues) {
     setError(null)
 
+    const chosenIds = candidates.filter(({ id }) => userIds.includes(id)).map(({ id }) => id)
+
     try {
-      await dispatch(
-        addGroupMembers({
-          conversationId,
-          userIds: candidates.filter(({ id }) => userIds.includes(id)).map(({ id }) => id),
-        }),
-      ).unwrap()
+      await dispatch(addGroupMembers({ conversationId, userIds: chosenIds })).unwrap()
+      onAdded(chosenIds.length)
       onDone()
     } catch (failure) {
       setError(getFailureMessage(failure))

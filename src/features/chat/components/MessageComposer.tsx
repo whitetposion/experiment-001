@@ -1,5 +1,5 @@
 import { Check, SendHorizontal, X } from 'lucide-react'
-import { useState, type KeyboardEvent, type Ref, type SubmitEvent } from 'react'
+import { useState, type KeyboardEvent, type RefObject, type SubmitEvent } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { FormError } from '@/components/ui/FormError'
 import { IconButton } from '@/components/ui/IconButton'
@@ -42,7 +42,7 @@ interface EditDraft {
 export interface MessageComposerProps {
   conversationId: ConversationId
   /** Lets the chat window move focus here when a reply or edit starts. */
-  inputRef: Ref<HTMLTextAreaElement>
+  inputRef: RefObject<HTMLTextAreaElement | null>
 }
 
 export function MessageComposer({ conversationId, inputRef }: MessageComposerProps) {
@@ -80,6 +80,7 @@ export function MessageComposer({ conversationId, inputRef }: MessageComposerPro
     setEditDraft(null)
     setError(null)
     dispatch(composerTargetChanged(null))
+    inputRef.current?.focus()
   }
 
   async function saveEdit(messageId: MessageId) {
@@ -121,6 +122,8 @@ export function MessageComposer({ conversationId, inputRef }: MessageComposerPro
       setError(getFailureMessage(failure))
     } finally {
       setIsBusy(false)
+      // The send button disables itself once the text clears, which would drop focus to the page.
+      inputRef.current?.focus()
     }
   }
 
@@ -171,7 +174,7 @@ export function MessageComposer({ conversationId, inputRef }: MessageComposerPro
         <Textarea
           aria-label={isEditing ? 'Edit message' : 'Message'}
           autoResize
-          className="max-h-40"
+          className="max-h-[min(10rem,35dvh)]"
           onChange={(event) => {
             changeText(event.target.value)
           }}
@@ -185,6 +188,10 @@ export function MessageComposer({ conversationId, inputRef }: MessageComposerPro
           disabled={!canSubmit}
           label={isEditing ? 'Save edit' : 'Send message'}
           loading={isBusy}
+          // Keeps focus in the text box, so tapping send does not close a phone's keyboard.
+          onMouseDown={(event) => {
+            event.preventDefault()
+          }}
           type="submit"
           variant="primary"
         >

@@ -15,6 +15,7 @@ import {
 import { openConversation } from '@/features/conversations/state/workflows'
 import { MessageStatusIndicator } from '@/features/messages'
 import { cn } from '@/lib/cn'
+import { countLabel } from '@/lib/countLabel'
 import { formatConversationTime } from '@/lib/formatConversationTime'
 import type { ConversationId } from '@/types/ids'
 import { ConversationAvatar } from './ConversationAvatar'
@@ -101,11 +102,7 @@ export const ConversationItem = memo(function ConversationItem({
             {hasUnread ? (
               <Badge className="min-w-5 tabular-nums" variant="primary">
                 <span aria-hidden="true">{unreadCount}</span>
-                <span className="sr-only">
-                  {unreadCount === 1
-                    ? '1 unread message'
-                    : `${String(unreadCount)} unread messages`}
-                </span>
+                <span className="sr-only">{countLabel(unreadCount, 'unread message')}</span>
               </Badge>
             ) : null}
           </span>

@@ -21,6 +21,23 @@ async function renderSidebar() {
 const rows = () => within(screen.getByRole('list')).getAllByRole('button')
 const row = (name: RegExp) => screen.getByRole('button', { name })
 
+describe('profile', () => {
+  it('explains a failed directory load, and recovers on retry', async () => {
+    const { api, store } = createTestStore()
+    api.failNextRequest()
+    await store.dispatch(fetchDirectory())
+    renderWithProviders(<ConversationSidebar />, { store })
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Could not load people')
+    expect(screen.queryByLabelText('Loading your profile')).not.toBeInTheDocument()
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Try again' }))
+
+    expect(await screen.findByText('Maya Iyer')).toBeInTheDocument()
+    expect(screen.queryByText('Could not load people')).not.toBeInTheDocument()
+  })
+})
+
 describe('list', () => {
   it('shows direct and group conversations in one list, newest first', async () => {
     await renderSidebar()

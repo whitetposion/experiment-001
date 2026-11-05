@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { renderLoaded } from '@/test/render'
 import { App } from './App'
@@ -62,5 +62,20 @@ describe('App', () => {
 
     expect(conversationPanel()).toHaveClass('hidden')
     expect(sidebarPanel()).not.toHaveClass('hidden')
+  })
+
+  it('closes the chat on system back instead of leaving the app', async () => {
+    const { user } = await renderApp()
+    const row = screen.getByRole('button', { name: /Rohan Desai/ })
+
+    await user.click(row)
+    await within(conversationPanel()).findByRole('heading', { name: 'Rohan Desai' })
+
+    history.back()
+
+    await waitFor(() => {
+      expect(conversationPanel()).toHaveClass('hidden')
+    })
+    expect(row).toHaveFocus()
   })
 })

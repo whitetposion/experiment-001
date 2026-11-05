@@ -8,12 +8,14 @@ export interface DeleteMessageDialogProps {
   messageId: MessageId | null
   onClose: () => void
   onCloseAutoFocus: () => void
+  onDeleted: () => void
 }
 
 export function DeleteMessageDialog({
   messageId,
   onClose,
   onCloseAutoFocus,
+  onDeleted,
 }: DeleteMessageDialogProps) {
   const dispatch = useAppDispatch()
 
@@ -26,6 +28,7 @@ export function DeleteMessageDialog({
       onConfirm={async () => {
         if (messageId) {
           await dispatch(deleteMessage(messageId)).unwrap()
+          onDeleted()
         }
       }}
       open={messageId !== null}

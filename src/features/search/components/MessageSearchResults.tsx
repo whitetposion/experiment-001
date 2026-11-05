@@ -15,6 +15,7 @@ import {
 import { searchMessages } from '@/features/search/state/thunks'
 import { openSearchResult } from '@/features/search/state/workflows'
 import { cn } from '@/lib/cn'
+import { countLabel } from '@/lib/countLabel'
 import { formatConversationTime } from '@/lib/formatConversationTime'
 import { highlightMatch } from '@/lib/highlightMatch'
 import type { MessageId } from '@/types/ids'
@@ -94,7 +95,7 @@ export function MessageSearchResults() {
       </h2>
 
       <p aria-live="polite" className="sr-only" role="status">
-        {isLoading ? '' : `${String(ids.length)} messages found`}
+        {isLoading ? '' : `${countLabel(ids.length, 'message')} found`}
       </p>
 
       {isLoading && ids.length === 0 ? (

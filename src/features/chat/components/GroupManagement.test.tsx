@@ -195,6 +195,16 @@ describe('permissions', () => {
 })
 
 describe('adding members', () => {
+  it('confirms how many people were added', async () => {
+    const { panel, user } = await renderPanel(launch)
+    await user.click(addButton(panel))
+
+    await user.click(within(panel).getByRole('checkbox', { name: 'Sara Thomas' }))
+    await user.click(within(panel).getByRole('button', { name: 'Add' }))
+
+    expect(await within(panel).findByRole('status')).toHaveTextContent('Added 1 person')
+  })
+
   it('offers only people outside the group, and requires a choice', async () => {
     const { panel, user } = await renderPanel(launch)
 
@@ -281,6 +291,14 @@ describe('adding members', () => {
 })
 
 describe('removing members', () => {
+  it('confirms who was removed', async () => {
+    const { panel, user } = await renderPanel(launch)
+
+    await confirmRemoval(user, 'Priya Nair')
+
+    expect(within(panel).getByRole('status')).toHaveTextContent('Removed Priya Nair')
+  })
+
   it('asks first, and cancelling keeps the member and focus', async () => {
     const { panel, store, user } = await renderPanel(launch)
     const button = within(panel).getByRole('button', { name: 'Remove Priya Nair' })

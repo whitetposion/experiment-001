@@ -15,6 +15,8 @@ import {
   selectGroupMembers,
   type GroupMemberView,
 } from '@/features/conversations/state/selectors'
+import { useTimedNotice } from '@/hooks/useTimedNotice'
+import { countLabel } from '@/lib/countLabel'
 import { formatLastSeen } from '@/lib/formatConversationTime'
 import { formatFullDate } from '@/lib/formatMessageDate'
 import { getInitials } from '@/lib/initials'
@@ -94,6 +96,7 @@ export function GroupInfoPanel({
   const members = useAppSelector((state) => selectGroupMembers(state, conversationId))
   const canManage = useAppSelector((state) => selectCanManageMembers(state, conversationId))
   const creatorName = useAppSelector((state) => selectGroupCreatorName(state, conversationId))
+  const { notice, showNotice } = useTimedNotice()
   const [isAdding, setIsAdding] = useState(false)
   const [hasReturnedFromAdding, setHasReturnedFromAdding] = useState(false)
   const [pendingRemovalId, setPendingRemovalId] = useState<UserId | null>(null)
@@ -158,7 +161,7 @@ export function GroupInfoPanel({
         <section aria-labelledby="group-members-heading" className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
             <h3 className="font-semibold tracking-tight" id="group-members-heading">
-              {members.length} members
+              {countLabel(members.length, 'member')}
             </h3>
             {canManage && !isAdding ? (
               <Button
@@ -175,9 +178,16 @@ export function GroupInfoPanel({
             ) : null}
           </div>
 
+          <p className="min-h-4 text-xs text-muted-foreground" role="status">
+            {notice}
+          </p>
+
           {isAdding ? (
             <AddMembersForm
               conversationId={conversationId}
+              onAdded={(count) => {
+                showNotice(`Added ${countLabel(count, 'person', 'people')}`)
+              }}
               onDone={() => {
                 setIsAdding(false)
                 setHasReturnedFromAdding(true)
@@ -207,6 +217,9 @@ export function GroupInfoPanel({
             setPendingRemovalId(null)
           }}
           onCloseAutoFocus={restoreFocusAfterRemoval}
+          onRemoved={(name) => {
+            showNotice(`Removed ${name}`)
+          }}
         />
       </DialogContent>
     </Dialog>

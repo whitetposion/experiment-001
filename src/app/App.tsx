@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { connectChatEvents } from '@/app/chatEvents'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { useConversationBackNavigation } from '@/app/useConversationBackNavigation'
 import { useGlobalShortcuts } from '@/app/useGlobalShortcuts'
 import { AppShell } from '@/components/layout/AppShell'
 import { ChatWindow } from '@/features/chat'
@@ -31,6 +32,7 @@ export function App() {
   // An external subscription, which is what effects are for. Its cleanup stops every timer.
   useEffect(() => dispatch(connectChatEvents()), [dispatch])
   useGlobalShortcuts()
+  useConversationBackNavigation()
 
   return (
     <>
