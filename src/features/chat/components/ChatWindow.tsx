@@ -1,16 +1,46 @@
 import { MessagesSquare } from 'lucide-react'
-import { useRef } from 'react'
+import { useRef, type RefObject } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { selectConversationById, selectSelectedConversationId } from '@/features/conversations'
+import {
+  GroupInfoPanel,
+  selectConversationById,
+  selectSelectedConversationId,
+} from '@/features/conversations'
 import { MessageList } from '@/features/messages'
-import { composerTargetChanged } from '@/features/ui'
+import { composerTargetChanged, detailsPanelToggled, selectIsDetailsPanelOpen } from '@/features/ui'
 import type { ConversationId, MessageId } from '@/types/ids'
 import { ChatHeader } from './ChatHeader'
 import { MessageComposer } from './MessageComposer'
 
+/** Subscribes on its own, so opening the panel does not re-render the conversation. */
+function ConversationDetails({
+  conversationId,
+  returnFocusRef,
+}: {
+  conversationId: ConversationId
+  returnFocusRef: RefObject<HTMLButtonElement | null>
+}) {
+  const dispatch = useAppDispatch()
+  const isOpen = useAppSelector(selectIsDetailsPanelOpen)
+
+  return (
+    <GroupInfoPanel
+      conversationId={conversationId}
+      onCloseAutoFocus={() => {
+        returnFocusRef.current?.focus()
+      }}
+      onOpenChange={(open) => {
+        dispatch(detailsPanelToggled(open))
+      }}
+      open={isOpen}
+    />
+  )
+}
+
 function ActiveChat({ conversationId }: { conversationId: ConversationId }) {
   const dispatch = useAppDispatch()
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const infoButtonRef = useRef<HTMLButtonElement>(null)
   const isGroup = useAppSelector(
     (state) => selectConversationById(state, conversationId)?.type === 'group',
   )
@@ -27,7 +57,7 @@ function ActiveChat({ conversationId }: { conversationId: ConversationId }) {
 
   return (
     <div className="flex h-full flex-col">
-      <ChatHeader conversationId={conversationId} />
+      <ChatHeader conversationId={conversationId} infoButtonRef={infoButtonRef} />
       <MessageList
         conversationId={conversationId}
         onEdit={handleEdit}
@@ -35,6 +65,7 @@ function ActiveChat({ conversationId }: { conversationId: ConversationId }) {
         showSender={isGroup}
       />
       <MessageComposer conversationId={conversationId} inputRef={inputRef} />
+      <ConversationDetails conversationId={conversationId} returnFocusRef={infoButtonRef} />
     </div>
   )
 }

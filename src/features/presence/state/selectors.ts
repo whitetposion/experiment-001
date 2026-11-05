@@ -21,6 +21,7 @@ export const selectDirectoryStatus = (state: RootState) => state.presence.status
 export const selectDirectoryError = (state: RootState) => state.presence.error
 
 export const selectUserPresence = statusSelectors.selectById
+export const selectPresenceEntities = statusSelectors.selectEntities
 
 /** A boolean, so a component only re-renders when this user goes online or offline. */
 export const selectIsUserOnline = (state: RootState, userId: UserId) =>

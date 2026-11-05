@@ -2,13 +2,15 @@ import { shallowEqual } from 'react-redux'
 import { createAppSelector, type RootState } from '@/app/hooks'
 import { selectMessageById } from '@/features/messages'
 import {
+  selectAllUsers,
   selectCurrentUserId,
   selectIsUserOnline,
+  selectPresenceEntities,
   selectUserEntities,
   selectUserPresence,
 } from '@/features/presence'
 import { formatConversationTime } from '@/lib/formatConversationTime'
-import type { Conversation, ConversationFilter } from '@/types/conversation'
+import type { Conversation, ConversationFilter, ParticipantRole } from '@/types/conversation'
 import type { ConversationId, UserId } from '@/types/ids'
 import type { MessageDeliveryStatus } from '@/types/message'
 import type { User } from '@/types/user'
@@ -180,6 +182,68 @@ export const selectCanManageMembers = (state: RootState, conversationId: Convers
 
   return role === 'owner' || role === 'admin'
 }
+
+export const selectGroupCreatorName = (state: RootState, conversationId: ConversationId) => {
+  const creatorId = selectConversationById(state, conversationId)?.creatorId
+
+  if (!creatorId) {
+    return null
+  }
+
+  return creatorId === selectCurrentUserId(state)
+    ? 'you'
+    : (selectUserEntities(state)[creatorId]?.displayName ?? null)
+}
+
+export interface GroupMemberView {
+  readonly userId: UserId
+  readonly name: string
+  readonly role: ParticipantRole
+  readonly isCurrentUser: boolean
+  readonly isOnline: boolean
+  readonly lastSeenAt: string | null
+  /** Matches what the backend allows, so the UI never offers an action that must fail. */
+  readonly canRemove: boolean
+}
+
+const ROLE_ORDER: Record<ParticipantRole, number> = { owner: 0, admin: 1, member: 2 }
+
+/** Owners first, then admins, then members by name. */
+export const selectGroupMembers = createAppSelector(
+  [selectParticipants, selectUserEntities, selectPresenceEntities, selectCurrentUserId],
+  (participants, users, presence, currentUserId): readonly GroupMemberView[] => {
+    const ownRole = participants.find(({ userId }) => userId === currentUserId)?.role
+    const canManage = ownRole === 'owner' || ownRole === 'admin'
+
+    return participants
+      .map(({ role, userId }) => {
+        const isCurrentUser = userId === currentUserId
+
+        return {
+          userId,
+          name: users[userId]?.displayName ?? UNKNOWN_CONTACT,
+          role,
+          isCurrentUser,
+          isOnline: presence[userId]?.status === 'online',
+          lastSeenAt: presence[userId]?.lastSeenAt ?? null,
+          canRemove: canManage && !isCurrentUser && role !== 'owner',
+        }
+      })
+      .sort(
+        (first, second) =>
+          ROLE_ORDER[first.role] - ROLE_ORDER[second.role] || first.name.localeCompare(second.name),
+      )
+  },
+)
+
+/** People who could join this group, by name. */
+export const selectAddableUsers = createAppSelector(
+  [selectConversationById, selectAllUsers],
+  (conversation, users) =>
+    users
+      .filter(({ id }) => !conversation?.participantIds.includes(id))
+      .sort((first, second) => first.displayName.localeCompare(second.displayName)),
+)
 
 export interface ConversationPreview {
   /** "You", or a first name in groups. */

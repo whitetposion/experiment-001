@@ -1,6 +1,8 @@
 export { ConversationAvatar } from './components/ConversationAvatar'
+export { GroupInfoPanel } from './components/GroupInfoPanel'
 export { ConversationSidebar } from './components/ConversationSidebar'
 export {
+  selectAddableUsers,
   selectAllConversations,
   selectCanManageMembers,
   selectConversationAvatarUrl,
@@ -13,6 +15,8 @@ export {
   selectConversationsStatus,
   selectConversationSubtitle,
   selectConversationTitle,
+  selectGroupCreatorName,
+  selectGroupMembers,
   selectIsDirectContactOnline,
   selectParticipants,
   selectSelectedConversation,
@@ -21,6 +25,7 @@ export {
   selectUnreadCount,
   selectVisibleConversationIds,
   type ConversationPreview,
+  type GroupMemberView,
 } from './state/selectors'
 export {
   conversationLeft,

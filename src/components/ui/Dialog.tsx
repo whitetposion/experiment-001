@@ -19,9 +19,8 @@ export function DialogClose(props: ComponentProps<typeof DialogPrimitive.Close>)
 
 const dialogContentVariants = cva(
   [
-    'fixed top-1/2 left-1/2 z-50 flex -translate-x-1/2 -translate-y-1/2 animate-scale-in flex-col gap-4',
-    'max-h-[calc(100dvh-2*var(--ds-spacing-gutter))] w-[calc(100%-2*var(--ds-spacing-gutter))] overflow-y-auto',
-    'rounded-panel border bg-surface-elevated p-panel text-surface-elevated-foreground shadow-lg backdrop-blur-panel',
+    'fixed z-50 flex flex-col gap-4 overflow-y-auto border bg-surface-elevated p-panel',
+    'text-surface-elevated-foreground shadow-lg backdrop-blur-panel',
   ],
   {
     variants: {
@@ -30,9 +29,22 @@ const dialogContentVariants = cva(
         md: 'max-w-md',
         lg: 'max-w-lg',
       },
+      placement: {
+        center: [
+          'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-scale-in rounded-panel',
+          'max-h-[calc(100dvh-2*var(--ds-spacing-gutter))] w-[calc(100%-2*var(--ds-spacing-gutter))]',
+        ],
+        // Full screen on a phone, and a sheet along the right edge from there up.
+        right: [
+          'top-0 right-0 bottom-0 w-full max-w-full animate-slide-in border-y-0 border-r-0',
+          'pt-[max(var(--ds-panel-padding),env(safe-area-inset-top))]',
+          'pb-[max(var(--ds-panel-padding),env(safe-area-inset-bottom))] sm:max-w-sm',
+        ],
+      },
     },
     defaultVariants: {
       size: 'md',
+      placement: 'center',
     },
   },
 )
@@ -50,6 +62,7 @@ export function DialogContent({
   className,
   closeLabel = 'Close',
   hideClose = false,
+  placement,
   size,
   ...props
 }: DialogContentProps) {
@@ -57,7 +70,7 @@ export function DialogContent({
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade-in bg-overlay backdrop-blur-sm" />
       <DialogPrimitive.Content
-        className={cn(dialogContentVariants({ size }), className)}
+        className={cn(dialogContentVariants({ placement, size }), className)}
         {...props}
       >
         {children}

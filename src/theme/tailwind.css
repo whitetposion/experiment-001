@@ -114,10 +114,17 @@
   --ease-emphasized: var(--ds-ease-emphasized);
   --animate-fade-in: ds-fade-in var(--ds-duration-fast) var(--ds-ease-standard);
   --animate-scale-in: ds-scale-in var(--ds-duration-normal) var(--ds-ease-emphasized);
+  --animate-slide-in: ds-slide-in var(--ds-duration-normal) var(--ds-ease-emphasized);
 
   @keyframes ds-fade-in {
     from {
       opacity: 0;
+    }
+  }
+
+  @keyframes ds-slide-in {
+    from {
+      translate: 100% 0;
     }
   }
 

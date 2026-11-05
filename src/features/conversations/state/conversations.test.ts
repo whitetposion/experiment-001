@@ -12,6 +12,7 @@ import { TEST_NOW, createTestStore } from '@/test/store'
 import { toConversationId, toMessageId, toUserId, type ConversationId } from '@/types/ids'
 import type { ActiveMessage } from '@/types/message'
 import {
+  selectAddableUsers,
   selectAllConversations,
   selectCanManageMembers,
   selectConversationById,
@@ -19,6 +20,7 @@ import {
   selectConversationsError,
   selectConversationsStatus,
   selectConversationTitle,
+  selectGroupMembers,
   selectIsDirectContactOnline,
   selectParticipants,
   selectSelectedConversation,
@@ -385,6 +387,38 @@ describe('group members', () => {
 
     await expect(store.dispatch(leaveGroup(launch))).rejects.toMatchObject({ code: 'conflict' })
     expect(selectConversationById(store.getState(), launch)).toBeDefined()
+  })
+})
+
+describe('group member views', () => {
+  it('keeps the list when an unrelated conversation changes', async () => {
+    const { store } = await loaded()
+    const before = selectGroupMembers(store.getState(), launch)
+
+    store.dispatch(messageReceived(incoming(priya, 'message-new')))
+
+    expect(selectGroupMembers(store.getState(), launch)).toBe(before)
+  })
+
+  it('updates a member when their presence changes', async () => {
+    const { store } = await loaded()
+    const userId = toUserId('user-priya')
+    const find = () =>
+      selectGroupMembers(store.getState(), launch).find((member) => member.userId === userId)
+
+    expect(find()?.isOnline).toBe(true)
+
+    store.dispatch(presenceChanged({ userId, status: 'offline', lastSeenAt: null }))
+
+    expect(find()?.isOnline).toBe(false)
+  })
+
+  it('offers people outside the group, by name', async () => {
+    const { store } = await loaded()
+
+    expect(
+      selectAddableUsers(store.getState(), launch).map(({ displayName }) => displayName),
+    ).toEqual(['Kabir Shah', 'Neha Kapoor', 'Rohan Desai', 'Sara Thomas', 'Vikram Joshi'])
   })
 })
 

@@ -156,6 +156,16 @@ Messages keep their relationships through these changes:
 - Deleting a message clears any reply or edit that targets it.
 - Editing changes only the text and `editedAt`, so reactions, replies and position are unaffected.
 
+## Group management
+
+Groups have no state of their own. `addGroupMembers` and `removeGroupMember` update the shared
+conversation and its participants, so the header count, member list and sidebar stay correct with no
+extra work.
+
+`GroupInfoPanel` opens from `isDetailsPanelOpen` in `ui`. A small wrapper subscribes to that flag, so
+opening the panel does not re-render the chat. `selectGroupMembers` works out `canRemove` with the
+same rules the backend enforces, so the UI never offers an action that must fail.
+
 ## Entity adapters
 
 `createEntityAdapter` is used wherever data is keyed by ID: conversations, participants, messages,

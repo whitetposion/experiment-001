@@ -5,6 +5,7 @@ export {
   selectDirectoryError,
   selectDirectoryStatus,
   selectIsUserOnline,
+  selectPresenceEntities,
   selectTypingUserIds,
   selectUserById,
   selectUserEntities,

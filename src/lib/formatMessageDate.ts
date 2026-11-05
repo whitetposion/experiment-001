@@ -4,6 +4,14 @@ export function formatMessageTime(timestamp: string) {
   return new Date(timestamp).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
 }
 
+export function formatFullDate(timestamp: string) {
+  return new Date(timestamp).toLocaleDateString(undefined, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
 /** A label for the divider above each day of messages. */
 export function formatMessageDay(timestamp: string, now = new Date()) {
   const date = new Date(timestamp)

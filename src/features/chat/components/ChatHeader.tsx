@@ -1,18 +1,30 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Info } from 'lucide-react'
+import type { Ref } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { IconButton } from '@/components/ui/IconButton'
 import {
   ConversationAvatar,
   conversationSelected,
+  selectConversationById,
   selectConversationSubtitle,
   selectConversationTitle,
 } from '@/features/conversations'
+import { detailsPanelToggled } from '@/features/ui'
 import type { ConversationId } from '@/types/ids'
 
-export function ChatHeader({ conversationId }: { conversationId: ConversationId }) {
+export interface ChatHeaderProps {
+  conversationId: ConversationId
+  /** Lets focus return here when the group panel closes. */
+  infoButtonRef: Ref<HTMLButtonElement>
+}
+
+export function ChatHeader({ conversationId, infoButtonRef }: ChatHeaderProps) {
   const dispatch = useAppDispatch()
   const title = useAppSelector((state) => selectConversationTitle(state, conversationId))
   const subtitle = useAppSelector((state) => selectConversationSubtitle(state, conversationId))
+  const isGroup = useAppSelector(
+    (state) => selectConversationById(state, conversationId)?.type === 'group',
+  )
 
   return (
     <header className="flex min-h-control items-center gap-2 border-b bg-surface px-2 py-2 backdrop-blur-surface md:gap-3 md:px-gutter">
@@ -26,10 +38,21 @@ export function ChatHeader({ conversationId }: { conversationId: ConversationId 
         <ArrowLeft aria-hidden="true" />
       </IconButton>
       <ConversationAvatar conversationId={conversationId} size="md" />
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <h2 className="truncate font-semibold tracking-tight">{title}</h2>
         {subtitle ? <p className="truncate text-xs text-muted-foreground">{subtitle}</p> : null}
       </div>
+      {isGroup ? (
+        <IconButton
+          label="Group info"
+          onClick={() => {
+            dispatch(detailsPanelToggled(true))
+          }}
+          ref={infoButtonRef}
+        >
+          <Info aria-hidden="true" />
+        </IconButton>
+      ) : null}
     </header>
   )
 }
