@@ -70,7 +70,8 @@ would give the wrong number. `unread` describes the signed-in user only.
 **Presence is separate from `User`.** Presence changes constantly and profiles rarely do. Keeping
 them apart stops a status change from re-rendering everything that reads a profile.
 
-**Typing indicators expire.** `expiresAt` clears an indicator if the stop event never arrives.
+**Typing indicators expire.** `connectChatEvents` clears an indicator at `expiresAt` if the stop
+event never arrives.
 
 **IDs are branded.** They are strings at runtime, but the compiler rejects a `ConversationId` where
 a `UserId` belongs. Data from outside, such as mock JSON, enters through `toUserId` and the other

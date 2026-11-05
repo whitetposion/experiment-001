@@ -22,6 +22,7 @@ export {
   selectSelectedConversation,
   selectSelectedConversationId,
   selectTotalUnreadCount,
+  selectTypingLabel,
   selectUnreadCount,
   selectVisibleConversationIds,
   type ConversationPreview,

@@ -6,6 +6,7 @@ import {
   selectCurrentUserId,
   selectIsUserOnline,
   selectPresenceEntities,
+  selectTypingUserIds,
   selectUserEntities,
   selectUserPresence,
 } from '@/features/presence'
@@ -166,6 +167,32 @@ export const selectConversationSubtitle = (state: RootState, conversationId: Con
   }
 
   return presence?.lastSeenAt ? `Last seen ${formatConversationTime(presence.lastSeenAt)}` : ''
+}
+
+/** Who is typing, in words, or null. A string, so it only updates when the words change. */
+export const selectTypingLabel = (state: RootState, conversationId: ConversationId) => {
+  const conversation = selectConversationById(state, conversationId)
+  const typingIds = selectTypingUserIds(state, conversationId)
+  const [firstId, secondId] = typingIds
+
+  if (!conversation || !firstId) {
+    return null
+  }
+
+  if (conversation.type === 'direct') {
+    return 'typing…'
+  }
+
+  const users = selectUserEntities(state)
+  const firstName = (userId: UserId) => users[userId]?.displayName.split(' ')[0] ?? 'Someone'
+
+  if (typingIds.length > 2) {
+    return 'Several people are typing…'
+  }
+
+  return secondId
+    ? `${firstName(firstId)} and ${firstName(secondId)} are typing…`
+    : `${firstName(firstId)} is typing…`
 }
 
 export const selectCanManageMembers = (state: RootState, conversationId: ConversationId) => {

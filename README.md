@@ -70,7 +70,8 @@ Redux Toolkit holds normalized conversations, messages and presence. See
 ## Mock backend
 
 The app talks to a `ChatApi` interface, implemented by an in-memory mock. See
-[docs/mock-api.md](docs/mock-api.md).
+[docs/mock-api.md](docs/mock-api.md). A simulation plays everyone else, with presence, typing,
+messages and delivery status. See [docs/simulation.md](docs/simulation.md).
 
 ## Design tokens
 

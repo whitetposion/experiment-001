@@ -7,6 +7,7 @@ import {
   selectConversationTitle,
   selectIsDirectContactOnline,
   selectSelectedConversationId,
+  selectTypingLabel,
   selectUnreadCount,
 } from '@/features/conversations/state/selectors'
 import { openConversation } from '@/features/conversations/state/workflows'
@@ -36,6 +37,7 @@ export const ConversationItem = memo(function ConversationItem({
     (state) => selectSelectedConversationId(state) === conversationId,
   )
   const isOnline = useAppSelector((state) => selectIsDirectContactOnline(state, conversationId))
+  const typingLabel = useAppSelector((state) => selectTypingLabel(state, conversationId))
   const hasUnread = unreadCount > 0
   // The selected background needs its own text color to stay readable in every theme.
   const quietText = isSelected ? 'text-secondary-foreground' : 'text-muted-foreground'
@@ -76,18 +78,27 @@ export const ConversationItem = memo(function ConversationItem({
             ) : null}
           </span>
           <span className={cn('flex items-center gap-2 text-sm', quietText)}>
-            {preview?.deliveryStatus ? (
-              <MessageStatusIndicator
-                readClassName="text-primary"
-                status={preview.deliveryStatus}
-              />
-            ) : null}
-            {preview?.isDeleted ? <Ban aria-hidden="true" className="size-4 shrink-0" /> : null}
-            <span className={cn('min-w-0 flex-1 truncate', preview?.isDeleted && 'italic')}>
-              {preview?.senderLabel ? `${preview.senderLabel}: ` : null}
-              {preview?.text ?? 'No messages yet'}
-              {hasUnread ? <Pause /> : null}
-            </span>
+            {typingLabel ? (
+              <span className={cn('min-w-0 flex-1 truncate', !isSelected && 'text-primary')}>
+                {typingLabel}
+                {hasUnread ? <Pause /> : null}
+              </span>
+            ) : (
+              <>
+                {preview?.deliveryStatus ? (
+                  <MessageStatusIndicator
+                    readClassName="text-primary"
+                    status={preview.deliveryStatus}
+                  />
+                ) : null}
+                {preview?.isDeleted ? <Ban aria-hidden="true" className="size-4 shrink-0" /> : null}
+                <span className={cn('min-w-0 flex-1 truncate', preview?.isDeleted && 'italic')}>
+                  {preview?.senderLabel ? `${preview.senderLabel}: ` : null}
+                  {preview?.text ?? 'No messages yet'}
+                  {hasUnread ? <Pause /> : null}
+                </span>
+              </>
+            )}
             {hasUnread ? (
               <Badge className="min-w-5 tabular-nums" variant="primary">
                 <span aria-hidden="true">{unreadCount}</span>

@@ -1,7 +1,7 @@
 import type { Conversation, ConversationParticipant, GroupConversation } from '@/types/conversation'
 import type { ConversationId, MessageId, UserId } from '@/types/ids'
-import type { ActiveMessage, DeletedMessage, Message } from '@/types/message'
-import type { UserPresence } from '@/types/presence'
+import type { ActiveMessage, DeletedMessage, Message, MessageDeliveryStatus } from '@/types/message'
+import type { TypingIndicator, UserPresence } from '@/types/presence'
 import type { User } from '@/types/user'
 
 export interface RequestOptions {
@@ -65,6 +65,24 @@ export interface RemoveGroupMemberRequest {
   readonly userId: UserId
 }
 
+/** Something that happened on the server. A real backend would push these over a WebSocket. */
+export type ChatEvent =
+  | { readonly type: 'message-received'; readonly message: Message }
+  | {
+      readonly type: 'message-status-changed'
+      readonly messageId: MessageId
+      readonly status: MessageDeliveryStatus
+    }
+  | { readonly type: 'presence-changed'; readonly presence: UserPresence }
+  | { readonly type: 'typing-started'; readonly indicator: TypingIndicator }
+  | {
+      readonly type: 'typing-stopped'
+      readonly conversationId: ConversationId
+      readonly userId: UserId
+    }
+
+export type ChatEventListener = (event: ChatEvent) => void
+
 /**
  * Everything the application needs from a backend. Failures reject with an ApiError.
  * Message operations take a conversation or message ID, so they work the same for direct
@@ -88,4 +106,6 @@ export interface ChatApi {
   markConversationRead(conversationId: ConversationId): Promise<MarkConversationReadResponse>
   addGroupMembers(request: AddGroupMembersRequest): Promise<GroupMembersResponse>
   removeGroupMember(request: RemoveGroupMemberRequest): Promise<GroupMembersResponse>
+  /** Starts receiving live events, and returns the function that stops them. */
+  subscribe(listener: ChatEventListener): () => void
 }

@@ -1,8 +1,15 @@
 import { ApiError } from '@/services/apiError'
-import type { ChatApi, GroupMembersResponse, RequestOptions } from '@/services/chatApi'
+import type {
+  ChatApi,
+  ChatEvent,
+  ChatEventListener,
+  GroupMembersResponse,
+  RequestOptions,
+} from '@/services/chatApi'
 import type { Conversation, ConversationParticipant, GroupConversation } from '@/types/conversation'
 import { toMessageId, type ConversationId, type MessageId, type UserId } from '@/types/ids'
-import type { ActiveMessage, DeletedMessage, Message } from '@/types/message'
+import type { ActiveMessage, DeletedMessage, Message, MessageDeliveryStatus } from '@/types/message'
+import type { PresenceStatus } from '@/types/presence'
 import { delay } from './delay'
 import { createMockSeed, type MockSeed } from './seed'
 
@@ -21,9 +28,32 @@ export interface MockChatApiOptions {
   random?: () => number
 }
 
+/**
+ * The server side of the mock. It changes the data the API serves and pushes the matching
+ * event, so what arrives live always agrees with what a later request returns.
+ */
+export interface MockBackend {
+  readonly currentUserId: UserId
+  /** The conversations the current user is in. */
+  getConversations(): readonly Conversation[]
+  isMember(conversationId: ConversationId, userId: UserId): boolean
+  isOnline(userId: UserId): boolean
+  getOtherUserIds(): readonly UserId[]
+  /** The current user's messages in a conversation that are still in this status. */
+  getOwnMessageIds(conversationId: ConversationId, status: MessageDeliveryStatus): MessageId[]
+  /** Calls back whenever the current user sends a message. Returns the function that stops it. */
+  onMessageSent(listener: (message: ActiveMessage) => void): () => void
+  deliverMessage(conversationId: ConversationId, senderId: UserId, text: string): void
+  changeDeliveryStatus(messageId: MessageId, status: MessageDeliveryStatus): void
+  changePresence(userId: UserId, status: PresenceStatus): void
+  startTyping(conversationId: ConversationId, userId: UserId, expiresInMs: number): void
+  stopTyping(conversationId: ConversationId, userId: UserId): void
+}
+
 export interface MockChatApi extends ChatApi {
   /** Makes the next request fail. Call it several times to fail several requests. */
   failNextRequest(error?: ApiError): void
+  readonly backend: MockBackend
 }
 
 function networkError() {
@@ -50,12 +80,21 @@ export function createMockChatApi({
 }: MockChatApiOptions = {}): MockChatApi {
   const { currentUserId } = seed
   const users = new Map(seed.users.map((user) => [user.id, user]))
-  const presence = [...seed.presence]
+  let presence = [...seed.presence]
   const conversations = new Map(seed.conversations.map((item) => [item.id, item]))
   const messages = new Map(seed.messages.map((item) => [item.id, item]))
   let participants = [...seed.participants]
   let nextMessageNumber = 1
+  let nextReceivedNumber = 1
+  const eventListeners = new Set<ChatEventListener>()
+  const sentListeners = new Set<(message: ActiveMessage) => void>()
   const queuedFailures: ApiError[] = []
+
+  function emit(event: ChatEvent) {
+    for (const listener of eventListeners) {
+      listener(structuredClone(event))
+    }
+  }
 
   /** Every call passes through here, so all of them get latency, failures and isolation. */
   async function request<Result>(handler: () => Result, options?: RequestOptions) {
@@ -159,9 +198,128 @@ export function createMockChatApi({
     return { conversation, participants: participantsOf(group.id) }
   }
 
+  const backend: MockBackend = {
+    currentUserId,
+
+    getConversations: () =>
+      [...conversations.values()].filter(({ id }) => membership(id, currentUserId)),
+
+    isMember: (conversationId, userId) => membership(conversationId, userId) !== undefined,
+
+    isOnline: (userId) =>
+      presence.some((item) => item.userId === userId && item.status === 'online'),
+
+    getOtherUserIds: () => [...users.keys()].filter((id) => id !== currentUserId),
+
+    getOwnMessageIds: (conversationId, status) =>
+      messagesOf(conversationId)
+        .filter(
+          (message) =>
+            message.senderId === currentUserId &&
+            message.state === 'active' &&
+            message.deliveryStatus === status,
+        )
+        .map(({ id }) => id),
+
+    onMessageSent(listener) {
+      sentListeners.add(listener)
+      return () => {
+        sentListeners.delete(listener)
+      }
+    },
+
+    deliverMessage(conversationId, senderId, text) {
+      const conversation = conversations.get(conversationId)
+
+      // Either person can have left the group while a reply was on its way.
+      if (
+        !conversation ||
+        !membership(conversationId, senderId) ||
+        !membership(conversationId, currentUserId)
+      ) {
+        return
+      }
+
+      const createdAt = now().toISOString()
+      const message: ActiveMessage = {
+        id: toMessageId(`message-received-${String(nextReceivedNumber)}`),
+        conversationId,
+        senderId,
+        createdAt,
+        replyToMessageId: null,
+        deliveryStatus: 'delivered',
+        state: 'active',
+        text,
+        editedAt: null,
+        reactions: [],
+        attachments: [],
+      }
+
+      nextReceivedNumber += 1
+      messages.set(message.id, message)
+      conversations.set(conversationId, {
+        ...conversation,
+        lastMessageId: message.id,
+        updatedAt: createdAt,
+        unread: {
+          count: conversation.unread.count + 1,
+          firstUnreadMessageId: conversation.unread.firstUnreadMessageId ?? message.id,
+        },
+      })
+      emit({ type: 'message-received', message })
+    },
+
+    changeDeliveryStatus(messageId, status) {
+      const message = messages.get(messageId)
+
+      if (message) {
+        messages.set(messageId, { ...message, deliveryStatus: status })
+        emit({ type: 'message-status-changed', messageId, status })
+      }
+    },
+
+    changePresence(userId, status) {
+      const updated = {
+        userId,
+        status,
+        lastSeenAt: now().toISOString(),
+      }
+
+      presence = presence.map((item) => (item.userId === userId ? updated : item))
+      emit({ type: 'presence-changed', presence: updated })
+    },
+
+    startTyping(conversationId, userId, expiresInMs) {
+      const startedAt = now()
+
+      emit({
+        type: 'typing-started',
+        indicator: {
+          conversationId,
+          userId,
+          startedAt: startedAt.toISOString(),
+          expiresAt: new Date(startedAt.getTime() + expiresInMs).toISOString(),
+        },
+      })
+    },
+
+    stopTyping(conversationId, userId) {
+      emit({ type: 'typing-stopped', conversationId, userId })
+    },
+  }
+
   return {
+    backend,
+
     failNextRequest(error = networkError()) {
       queuedFailures.push(error)
+    },
+
+    subscribe(listener) {
+      eventListeners.add(listener)
+      return () => {
+        eventListeners.delete(listener)
+      }
     },
 
     getCurrentUser: (options) =>
@@ -249,6 +407,10 @@ export function createMockChatApi({
           lastMessageId: message.id,
           updatedAt: createdAt,
         })
+
+        for (const listener of sentListeners) {
+          listener(structuredClone(message))
+        }
 
         return message
       }),

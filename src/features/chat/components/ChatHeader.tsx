@@ -8,6 +8,7 @@ import {
   selectConversationById,
   selectConversationSubtitle,
   selectConversationTitle,
+  selectTypingLabel,
 } from '@/features/conversations'
 import { detailsPanelToggled } from '@/features/ui'
 import type { ConversationId } from '@/types/ids'
@@ -22,6 +23,7 @@ export function ChatHeader({ conversationId, infoButtonRef }: ChatHeaderProps) {
   const dispatch = useAppDispatch()
   const title = useAppSelector((state) => selectConversationTitle(state, conversationId))
   const subtitle = useAppSelector((state) => selectConversationSubtitle(state, conversationId))
+  const typingLabel = useAppSelector((state) => selectTypingLabel(state, conversationId))
   const isGroup = useAppSelector(
     (state) => selectConversationById(state, conversationId)?.type === 'group',
   )
@@ -40,7 +42,9 @@ export function ChatHeader({ conversationId, infoButtonRef }: ChatHeaderProps) {
       <ConversationAvatar conversationId={conversationId} size="md" />
       <div className="min-w-0 flex-1">
         <h2 className="truncate font-semibold tracking-tight">{title}</h2>
-        {subtitle ? <p className="truncate text-xs text-muted-foreground">{subtitle}</p> : null}
+        {(typingLabel ?? subtitle) ? (
+          <p className="truncate text-xs text-muted-foreground">{typingLabel ?? subtitle}</p>
+        ) : null}
       </div>
       {isGroup ? (
         <IconButton

@@ -81,7 +81,9 @@ earlier, whenever the app is opened.
 
 **Data lasts until the page reloads.** Saving it is the job of `services/storage`.
 
+**Live events come from the simulation.** See [simulation.md](simulation.md).
+
 ## Replacing the mock
 
-Write a class or factory that implements `ChatApi`, reject failures with `ApiError`, and pass it to
-`makeStore` in `src/main.tsx`. Nothing else depends on the mock.
+Write a class or factory that implements `ChatApi`, reject failures with `ApiError`, push live
+events through `subscribe`, and pass it to `makeStore` in `src/main.tsx`. Nothing else depends on the mock.
