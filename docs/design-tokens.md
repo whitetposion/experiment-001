@@ -64,9 +64,21 @@ resolved in the browser, so changing a variable restyles every utility with no r
 | Blur and transparency | `backdrop-blur-md`, `backdrop-blur-surface`, `opacity-disabled`                                                                                   |
 | Component tokens      | `h-control`, `h-control-sm`, `h-control-lg`, `px-control-x`, `rounded-control`, `p-panel`, `rounded-panel`, `shadow-panel`, `backdrop-blur-panel` |
 
+## Switching themes
+
+`ThemeProvider` sets `data-theme` on the root element from the user's preference: system, light, dark
+or glass. System follows the operating system and updates live. The choice is saved in
+`localStorage`, and other open tabs follow it.
+
+A small script in `index.html` applies the saved theme before the first paint, so nobody sees a flash
+of the wrong theme. It shares its storage key with `src/theme/preference.ts`.
+
+Components read the current theme with `useTheme`.
+
 ## Adding a theme
 
-Add a `[data-theme]` block to `src/theme/themes.css`, reassigning tokens. Anything left out keeps
+Add a `[data-theme]` block to `src/theme/themes.css`, reassigning tokens, and add its name to
+`THEME_PREFERENCES` and the script in `index.html`. Anything left out keeps
 its default. The contract test fails if a theme assigns a token that does not exist.
 
 ```css

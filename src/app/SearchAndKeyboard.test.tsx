@@ -26,7 +26,11 @@ const messagesSection = () => screen.findByRole('region', { name: 'Messages' })
 const composer = () => screen.getByRole('textbox', { name: 'Message' })
 
 function setPointer(coarse: boolean) {
-  window.matchMedia = vi.fn().mockReturnValue({ matches: coarse })
+  window.matchMedia = vi.fn().mockReturnValue({
+    matches: coarse,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  })
 }
 
 afterEach(() => {

@@ -6,6 +6,20 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
     />
+    <script>
+      // Applies the saved theme before the first paint, to avoid a flash of the wrong one.
+      // ThemeProvider takes over once the app loads, and shares this storage key.
+      ;(function () {
+        var theme = null
+        try {
+          theme = localStorage.getItem('chat-theme')
+        } catch (error) {}
+        if (theme !== 'light' && theme !== 'dark' && theme !== 'glass') {
+          theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+        document.documentElement.dataset.theme = theme
+      })()
+    </script>
     <title>react-app</title>
   </head>
   <body>

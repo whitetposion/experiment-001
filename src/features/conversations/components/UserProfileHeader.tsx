@@ -1,4 +1,5 @@
 import { useAppSelector } from '@/app/hooks'
+import { ThemeSwitcher } from '@/components/layout/ThemeSwitcher'
 import { Avatar } from '@/components/ui/Avatar'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { selectCurrentUser } from '@/features/presence'
@@ -16,7 +17,7 @@ export function UserProfileHeader() {
             fallback={getInitials(user.displayName)}
             src={user.avatarUrl ?? undefined}
           />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate font-semibold tracking-tight">{user.displayName}</p>
             {user.about ? (
               <p className="truncate text-xs text-muted-foreground">{user.about}</p>
@@ -34,6 +35,9 @@ export function UserProfileHeader() {
           <Skeleton className="h-4 w-32" />
         </div>
       )}
+      <span className="ml-auto">
+        <ThemeSwitcher />
+      </span>
     </header>
   )
 }
