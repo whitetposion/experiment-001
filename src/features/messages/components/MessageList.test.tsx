@@ -61,11 +61,17 @@ async function renderThread(conversationId: ConversationId, showSender = false) 
   await context.store.dispatch(bootstrapApp())
   await context.store.dispatch(openConversation(conversationId))
   const onReply = vi.fn()
+  const onEdit = vi.fn()
   renderWithProviders(
-    <MessageList conversationId={conversationId} onReply={onReply} showSender={showSender} />,
+    <MessageList
+      conversationId={conversationId}
+      onEdit={onEdit}
+      onReply={onReply}
+      showSender={showSender}
+    />,
     { store: context.store },
   )
-  return { ...context, onReply, user: userEvent.setup() }
+  return { ...context, onEdit, onReply, user: userEvent.setup() }
 }
 
 const bubble = (text: string) => screen.getByText(text).closest('li') as HTMLElement
@@ -226,21 +232,6 @@ describe('replies', () => {
     expect(bubble('My reply')).toHaveTextContent('This message was deleted')
   })
 
-  it('names who is being replied to, and reports the choice', async () => {
-    const { onReply, user } = await renderThread(rohan)
-
-    await user.click(
-      within(bubble('Want me to sign us both up?')).getByRole('button', {
-        name: 'Reply to Rohan Desai',
-      }),
-    )
-
-    expect(onReply).toHaveBeenCalledWith(toMessageId('message-rohan-6'))
-    expect(
-      within(bubble('Deal. 5k it is')).getByRole('button', { name: 'Reply to your message' }),
-    ).toBeInTheDocument()
-  })
-
   it('stays readable when the original is not loaded', async () => {
     const { store } = createTestStore()
     await store.dispatch(bootstrapApp())
@@ -251,7 +242,7 @@ describe('replies', () => {
     )
     await store.dispatch(fetchMessages({ conversationId: rohan }))
     renderWithProviders(
-      <MessageList conversationId={rohan} onReply={vi.fn()} showSender={false} />,
+      <MessageList conversationId={rohan} onEdit={vi.fn()} onReply={vi.fn()} showSender={false} />,
       {
         store,
       },
@@ -263,7 +254,9 @@ describe('replies', () => {
 
 describe('states', () => {
   it('shows a labelled skeleton while loading', () => {
-    renderWithProviders(<MessageList conversationId={rohan} onReply={vi.fn()} showSender={false} />)
+    renderWithProviders(
+      <MessageList conversationId={rohan} onEdit={vi.fn()} onReply={vi.fn()} showSender={false} />,
+    )
 
     expect(screen.getByRole('status', { name: 'Loading messages' })).toHaveAttribute(
       'aria-busy',
@@ -282,7 +275,7 @@ describe('states', () => {
     api.failNextRequest()
     await store.dispatch(fetchMessages({ conversationId: rohan }))
     renderWithProviders(
-      <MessageList conversationId={rohan} onReply={vi.fn()} showSender={false} />,
+      <MessageList conversationId={rohan} onEdit={vi.fn()} onReply={vi.fn()} showSender={false} />,
       {
         store,
       },

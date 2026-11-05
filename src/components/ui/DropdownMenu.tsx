@@ -98,6 +98,23 @@ export function DropdownMenuCheckboxItem({
   )
 }
 
+/** A compact on-off item with no indicator column, such as an emoji in a row of reactions. */
+export function DropdownMenuToggleItem({
+  className,
+  ...props
+}: ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>) {
+  return (
+    <DropdownMenuPrimitive.CheckboxItem
+      className={cn(
+        'flex size-9 cursor-default items-center justify-center rounded-md text-lg outline-none select-none',
+        'data-highlighted:bg-muted data-[state=checked]:bg-secondary',
+        className,
+      )}
+      {...props}
+    />
+  )
+}
+
 export function DropdownMenuRadioItem({
   children,
   className,

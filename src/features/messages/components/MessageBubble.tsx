@@ -1,14 +1,19 @@
-import { Ban, Reply } from 'lucide-react'
+import { Ban } from 'lucide-react'
 import { memo } from 'react'
-import { useAppSelector } from '@/app/hooks'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { Avatar } from '@/components/ui/Avatar'
-import { Badge } from '@/components/ui/Badge'
-import { IconButton } from '@/components/ui/IconButton'
-import { selectMessageView, type ReplyPreview } from '@/features/messages/state/selectors'
+import {
+  selectMessageView,
+  type ReactionSummary,
+  type ReplyPreview,
+} from '@/features/messages/state/selectors'
+import { toggleReaction } from '@/features/messages/state/workflows'
+import type { ApiFailure } from '@/services/apiError'
 import { cn } from '@/lib/cn'
 import { formatMessageDay } from '@/lib/formatMessageDate'
 import { getInitials } from '@/lib/initials'
 import type { MessageId } from '@/types/ids'
+import { MessageActions } from './MessageActions'
 import { MessageStatusIndicator } from './MessageStatusIndicator'
 import { MessageTimestamp } from './MessageTimestamp'
 
@@ -40,12 +45,49 @@ function ReplyQuote({ isOwn, reply }: { isOwn: boolean; reply: ReplyPreview }) {
   )
 }
 
+function ReactionChip({
+  messageId,
+  onNotice,
+  reaction,
+}: {
+  messageId: MessageId
+  onNotice: (message: string) => void
+  reaction: ReactionSummary
+}) {
+  const dispatch = useAppDispatch()
+  const { count, emoji, reactedByCurrentUser } = reaction
+
+  return (
+    <button
+      aria-label={`${emoji} ${String(count)} ${count === 1 ? 'reaction' : 'reactions'}`}
+      aria-pressed={reactedByCurrentUser}
+      className={cn(
+        'inline-flex min-h-6 items-center gap-1 rounded-pill bg-muted px-2 text-xs font-medium',
+        'text-muted-foreground transition-colors duration-fast hover:bg-secondary',
+        'focus-visible:outline-2 focus-visible:outline-offset-1',
+        reactedByCurrentUser && 'ring-1 ring-primary',
+      )}
+      onClick={() => {
+        dispatch(toggleReaction({ messageId, emoji })).catch((failure: unknown) => {
+          onNotice((failure as ApiFailure).message)
+        })
+      }}
+      type="button"
+    >
+      {emoji} {count}
+    </button>
+  )
+}
+
 export interface MessageBubbleProps {
   messageId: MessageId
   previousMessageId: MessageId | undefined
   /** Groups show who sent each message. Direct conversations do not need to. */
   showSender: boolean
   onReply: (messageId: MessageId) => void
+  onEdit: (messageId: MessageId) => void
+  onDelete: (messageId: MessageId) => void
+  onNotice: (message: string) => void
 }
 
 // memo pays off here: the list re-renders for every new message, and without it every
@@ -53,6 +95,9 @@ export interface MessageBubbleProps {
 // must keep onReply stable.
 export const MessageBubble = memo(function MessageBubble({
   messageId,
+  onDelete,
+  onEdit,
+  onNotice,
   onReply,
   previousMessageId,
   showSender,
@@ -120,16 +165,17 @@ export const MessageBubble = memo(function MessageBubble({
           </div>
         </div>
         {isActive ? (
-          <IconButton
-            className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100"
-            label={`Reply to ${senderName === 'You' ? 'your message' : senderName}`}
-            onClick={() => {
-              onReply(messageId)
-            }}
-            size="sm"
-          >
-            <Reply aria-hidden="true" />
-          </IconButton>
+          <MessageActions
+            isOwn={isOwn}
+            messageId={messageId}
+            onDelete={onDelete}
+            onEdit={onEdit}
+            onNotice={onNotice}
+            onReply={onReply}
+            reactions={reactions}
+            senderName={senderName}
+            text={message.text}
+          />
         ) : null}
       </div>
       {reactions.length > 0 ? (
@@ -139,14 +185,13 @@ export const MessageBubble = memo(function MessageBubble({
             isOwn ? 'justify-end' : showAvatarColumn && 'pl-9',
           )}
         >
-          {reactions.map(({ count, emoji, reactedByCurrentUser }) => (
-            <Badge
-              className={cn(reactedByCurrentUser && 'ring-1 ring-primary')}
-              key={emoji}
-              variant="neutral"
-            >
-              {emoji} {count}
-            </Badge>
+          {reactions.map((reaction) => (
+            <ReactionChip
+              key={reaction.emoji}
+              messageId={messageId}
+              onNotice={onNotice}
+              reaction={reaction}
+            />
           ))}
         </div>
       ) : null}

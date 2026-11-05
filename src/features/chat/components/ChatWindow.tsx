@@ -20,10 +20,20 @@ function ActiveChat({ conversationId }: { conversationId: ConversationId }) {
     inputRef.current?.focus()
   }
 
+  function handleEdit(messageId: MessageId) {
+    dispatch(composerTargetChanged({ mode: 'edit', messageId }))
+    inputRef.current?.focus()
+  }
+
   return (
     <div className="flex h-full flex-col">
       <ChatHeader conversationId={conversationId} />
-      <MessageList conversationId={conversationId} onReply={handleReply} showSender={isGroup} />
+      <MessageList
+        conversationId={conversationId}
+        onEdit={handleEdit}
+        onReply={handleReply}
+        showSender={isGroup}
+      />
       <MessageComposer conversationId={conversationId} inputRef={inputRef} />
     </div>
   )

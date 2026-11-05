@@ -132,6 +132,30 @@ Responses can arrive after newer changes, so reducers are written to tolerate th
 - `messageStatusChanged` only moves forward, because status events can arrive out of order.
 - A cancelled request returns the status to `idle` and records no error.
 
+## Message interactions
+
+Business changes go through Redux. Short-lived presentation stays in components.
+
+| Interaction              | State                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| Reply, edit              | `composerTarget` in `ui`, because a bubble sets it and the composer reads it |
+| Edit text, draft         | `MessageComposer`. The unsent draft survives an edit                         |
+| Reactions                | `toggleReaction` decides between adding and removing                         |
+| Delete                   | `deleteMessage`. `MessageList` owns the single confirmation dialog           |
+| Open menus, copy notices | Local to the component                                                       |
+
+Menu actions that move focus run after the menu has closed. The menu returns focus to its button as
+it closes, which would otherwise take focus back from the composer or a dialog.
+
+Messages keep their relationships through these changes:
+
+- A deleted message stays in place, so replies keep a valid `replyToMessageId` and show that the
+  original was deleted.
+- A quote is read from the original, so an edit reaches every reply.
+- A deleted reply keeps its link but shows no quote, because it shows none of its content.
+- Deleting a message clears any reply or edit that targets it.
+- Editing changes only the text and `editedAt`, so reactions, replies and position are unaffected.
+
 ## Entity adapters
 
 `createEntityAdapter` is used wherever data is keyed by ID: conversations, participants, messages,

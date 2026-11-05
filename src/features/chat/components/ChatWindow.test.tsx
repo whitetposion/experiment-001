@@ -198,8 +198,12 @@ describe('MessageComposer', () => {
 describe('replying', () => {
   async function startReply() {
     const context = await renderChat(rohan)
-    const buttons = screen.getAllByRole('button', { name: 'Reply to Rohan Desai' })
+    const buttons = screen.getAllByRole('button', {
+      name: 'Actions for message from Rohan Desai',
+    })
     await context.user.click(buttons.at(-1) ?? document.body)
+    await context.user.click(await screen.findByRole('menuitem', { name: 'Reply' }))
+    await screen.findByText('Replying to Rohan Desai')
     return context
   }
 
@@ -207,7 +211,9 @@ describe('replying', () => {
     await startReply()
 
     expect(screen.getByText('Replying to Rohan Desai')).toBeInTheDocument()
-    expect(input()).toHaveFocus()
+    await waitFor(() => {
+      expect(input()).toHaveFocus()
+    })
   })
 
   it('sends the reply and clears the banner', async () => {

@@ -125,7 +125,8 @@ export const selectMessageView = createAppSelector(
         : (users[sender.senderId]?.displayName ?? 'Unknown contact')
 
     function replyPreview(): ReplyPreview | null {
-      if (!message?.replyToMessageId) {
+      // A deleted message shows none of its content, and that includes what it quoted.
+      if (message?.state !== 'active' || !message.replyToMessageId) {
         return null
       }
 

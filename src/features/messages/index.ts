@@ -20,6 +20,7 @@ export {
   messagesSlice,
   messageStatusChanged,
 } from './state/slice'
+export { toggleReaction } from './state/workflows'
 export {
   addReaction,
   deleteMessage,

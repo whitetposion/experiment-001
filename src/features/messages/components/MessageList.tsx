@@ -1,4 +1,5 @@
 import { ArrowDown } from 'lucide-react'
+import { useCallback, useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
@@ -12,8 +13,10 @@ import {
   selectThreadStatus,
 } from '@/features/messages/state/selectors'
 import { fetchMessages } from '@/features/messages/state/thunks'
+import { useTimedNotice } from '@/hooks/useTimedNotice'
 import { cn } from '@/lib/cn'
 import type { ConversationId, MessageId } from '@/types/ids'
+import { DeleteMessageDialog } from './DeleteMessageDialog'
 import { MessageBubble } from './MessageBubble'
 
 const SKELETON_BUBBLES = [
@@ -44,9 +47,10 @@ export interface MessageListProps {
   conversationId: ConversationId
   showSender: boolean
   onReply: (messageId: MessageId) => void
+  onEdit: (messageId: MessageId) => void
 }
 
-export function MessageList({ conversationId, onReply, showSender }: MessageListProps) {
+export function MessageList({ conversationId, onEdit, onReply, showSender }: MessageListProps) {
   const dispatch = useAppDispatch()
   const ids = useAppSelector((state) => selectThreadMessageIds(state, conversationId))
   const status = useAppSelector((state) => selectThreadStatus(state, conversationId))
@@ -60,6 +64,27 @@ export function MessageList({ conversationId, onReply, showSender }: MessageList
     isLatestOwn,
     messageIds: ids,
   })
+
+  const { notice, showNotice } = useTimedNotice()
+  const [pendingDeleteId, setPendingDeleteId] = useState<MessageId | null>(null)
+  const lastDeleteTargetRef = useRef<MessageId | null>(null)
+
+  // Stable, because this list re-renders for each new message and memo on every bubble
+  // depends on it. The notice and pending delete state also live here for that reason.
+  const handleDelete = useCallback((messageId: MessageId) => {
+    lastDeleteTargetRef.current = messageId
+    setPendingDeleteId(messageId)
+  }, [])
+
+  /** Back to the message's menu button, or the list if the message no longer has one. */
+  function restoreFocusAfterDelete() {
+    const scroller = scrollerRef.current
+    const target = lastDeleteTargetRef.current
+    const trigger =
+      target && scroller?.querySelector<HTMLElement>(`[data-message-actions="${target}"]`)
+
+    ;(trigger ?? scroller)?.focus()
+  }
 
   const oldestId = ids[0]
   const isLoading = status === 'loading'
@@ -126,6 +151,9 @@ export function MessageList({ conversationId, onReply, showSender }: MessageList
               <MessageBubble
                 key={id}
                 messageId={id}
+                onDelete={handleDelete}
+                onEdit={onEdit}
+                onNotice={showNotice}
                 onReply={onReply}
                 previousMessageId={ids[index - 1]}
                 showSender={showSender}
@@ -134,6 +162,25 @@ export function MessageList({ conversationId, onReply, showSender }: MessageList
           </ol>
         ) : null}
       </div>
+
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center"
+        role="status"
+      >
+        {notice ? (
+          <span className="animate-fade-in rounded-pill bg-foreground px-3 py-1.5 text-xs text-background shadow-md">
+            {notice}
+          </span>
+        ) : null}
+      </div>
+
+      <DeleteMessageDialog
+        messageId={pendingDeleteId}
+        onClose={() => {
+          setPendingDeleteId(null)
+        }}
+        onCloseAutoFocus={restoreFocusAfterDelete}
+      />
 
       {isAwayFromBottom ? (
         <IconButton
