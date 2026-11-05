@@ -6,7 +6,7 @@ those properties, so a new visual identity only has to reassign variables.
 ## How a token reaches the screen
 
 ```
-src/theme/tokens.css       --ds-color-primary: oklch(0.49 0.2 275);
+src/theme/tokens.css       --ds-color-primary: oklch(0.5 0.13 155);
         │
 src/theme/tailwind.css     @theme inline { --color-primary: var(--ds-color-primary); }
         │
@@ -127,5 +127,5 @@ The contract test fails on a reference to an undefined token and on a defined to
 ## Enforcement
 
 ESLint rejects hex and color-function literals, arbitrary color classes, and removed palette classes
-in `src/app`, `src/components` and `src/features`. Lint matters here because a removed class would
+in `src/app`, `src/components`, `src/features` and `src/showcase`. Lint matters here because a removed class would
 otherwise fail silently.

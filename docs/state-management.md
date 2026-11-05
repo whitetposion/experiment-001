@@ -10,7 +10,8 @@ Redux Toolkit holds the state that several parts of the app share. Each feature 
 | `selectors.ts` | All reads and derived data                                         |
 | `workflows.ts` | Operations that coordinate several actions, such as opening a chat |
 
-Components import from a feature's `index.ts`, never from these files.
+Other features import from a feature's `index.ts`, never from these files. Components inside a
+feature may import them directly.
 
 ## State domains
 
@@ -18,7 +19,8 @@ Components import from a feature's `index.ts`, never from these files.
 conversations   conversation entities, participants, selection, search, filter
 messages        message entities, and per-conversation threads of ordered IDs
 presence        users, the current user, online status, typing
-ui              details panel and composer target
+search          message search result IDs and request status
+ui              details panel, composer target, highlighted message
 ```
 
 There is no group domain. Group operations are thunks in `conversations`, and they update the same

@@ -79,7 +79,7 @@ normalized records, and `seed.test.ts` verifies every reference.
 **Timestamps are relative to now.** Sample data always has messages from today, yesterday and
 earlier, whenever the app is opened.
 
-**Data lasts until the page reloads.** Saving it is the job of `services/storage`.
+**Data lasts until the page reloads.** `services/storage` is an empty placeholder for saving it.
 
 **Live events come from the simulation.** See [simulation.md](simulation.md).
 
