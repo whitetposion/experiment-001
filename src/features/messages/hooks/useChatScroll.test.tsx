@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { toMessageId, type MessageId } from '@/types/ids'
 import { useChatScroll } from './useChatScroll'
 
@@ -56,6 +56,96 @@ function scrollTo(position: number) {
   layout.scrollTop = position
   fireEvent.scroll(screen.getByTestId('scroller'))
 }
+
+function Thread({
+  ids: messageIds,
+  isLatestOwn = false,
+}: {
+  ids: MessageId[]
+  isLatestOwn?: boolean
+}) {
+  const { handleScroll, scrollerRef } = useChatScroll({ isLatestOwn, messageIds })
+
+  return (
+    <div data-testid="scroller" onScroll={handleScroll} ref={scrollerRef}>
+      <ol data-testid="list">
+        {messageIds.map((messageId) => (
+          <li data-message-id={messageId} key={messageId} />
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+describe('message arrival animation', () => {
+  const animate = vi.fn()
+  const tokens: Record<string, string> = {}
+
+  beforeEach(() => {
+    animate.mockClear()
+    Object.assign(tokens, {
+      '--ds-duration-slow': '320ms',
+      '--ds-duration-normal': '200ms',
+      '--ds-ease-emphasized': 'ease',
+    })
+    Element.prototype.animate = animate
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+      getPropertyValue: (name: string) => tokens[name] ?? '',
+      marginTop: '12px',
+    } as unknown as CSSStyleDeclaration)
+  })
+
+  afterEach(() => {
+    Reflect.deleteProperty(Element.prototype, 'animate')
+  })
+
+  it('slides the list and fades in a message the reader is following', () => {
+    const { rerender } = render(<Thread ids={ids('a')} />)
+
+    rerender(<Thread ids={ids('a', 'b')} />)
+
+    expect(animate).toHaveBeenCalledTimes(2)
+    expect(animate.mock.contexts[0]).toBe(screen.getByTestId('list'))
+    expect(animate.mock.calls[0]?.[0]).toEqual([
+      { transform: 'translateY(12px)' },
+      { transform: 'translateY(0)' },
+    ])
+    expect(layout.scrollTop).toBe(1000)
+  })
+
+  it('does not animate opening a conversation', () => {
+    render(<Thread ids={ids('a', 'b')} />)
+
+    expect(animate).not.toHaveBeenCalled()
+  })
+
+  it('does not animate older messages loading above', () => {
+    const { rerender } = render(<Thread ids={ids('b')} />)
+
+    rerender(<Thread ids={ids('a', 'b')} />)
+
+    expect(animate).not.toHaveBeenCalled()
+  })
+
+  it('leaves a reader who has scrolled up alone', () => {
+    const { rerender } = render(<Thread ids={ids('a')} />)
+    scrollTo(0)
+
+    rerender(<Thread ids={ids('a', 'b')} />)
+
+    expect(animate).not.toHaveBeenCalled()
+  })
+
+  it('respects reduced motion, where the duration tokens are zero', () => {
+    tokens['--ds-duration-slow'] = '0ms'
+    tokens['--ds-duration-normal'] = '0ms'
+    const { rerender } = render(<Thread ids={ids('a')} />)
+
+    rerender(<Thread ids={ids('a', 'b')} />)
+
+    expect(animate).not.toHaveBeenCalled()
+  })
+})
 
 describe('useChatScroll', () => {
   it('starts at the newest message', () => {

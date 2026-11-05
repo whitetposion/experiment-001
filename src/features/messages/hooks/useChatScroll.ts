@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { MessageId } from '@/types/ids'
+import { animateMessageArrival } from './animateMessageArrival'
 
 /** Within this distance of the end, the reader counts as following the conversation. */
 const NEAR_BOTTOM_PX = 80
@@ -62,6 +63,12 @@ export function useChatScroll({
       scroller.scrollTop += scroller.scrollHeight - previous.scrollHeight
     } else if (wasEmpty || (gainedNewer && (isNearBottomRef.current || isLatestOwn))) {
       scroller.scrollTop = scroller.scrollHeight
+
+      const newest = gainedNewer && lastId ? findMessage(scroller, lastId) : null
+
+      if (newest) {
+        animateMessageArrival(newest)
+      }
     }
 
     previousRef.current = { firstId, lastId, scrollHeight: scroller.scrollHeight }
