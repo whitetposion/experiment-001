@@ -82,6 +82,7 @@ export interface ChatApi {
   sendMessage(request: SendMessageRequest): Promise<ActiveMessage>
   editMessage(request: EditMessageRequest): Promise<ActiveMessage>
   deleteMessage(messageId: MessageId): Promise<DeletedMessage>
+  /** Each user has one reaction per message, so this replaces any previous one. */
   addReaction(request: ReactionRequest): Promise<ActiveMessage>
   removeReaction(request: ReactionRequest): Promise<ActiveMessage>
   markConversationRead(conversationId: ConversationId): Promise<MarkConversationReadResponse>

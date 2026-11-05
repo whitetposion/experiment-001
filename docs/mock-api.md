@@ -58,6 +58,7 @@ Every failure is an `ApiError`. `message` is written for people, so the UI can s
 - Users can only edit or delete their own messages.
 - Deleted messages cannot be edited, and deleting one again succeeds so retries are safe.
 - A reply must target a message in the same conversation.
+- Each person has one reaction per message, and a new emoji replaces it.
 - Owners and admins manage members. Anyone can leave, except a group's only owner.
 - Owners cannot be removed by someone else.
 - A conversation the user is not in is reported as missing.

@@ -228,19 +228,27 @@ describe('reactions', () => {
   it('updates when the current user adds and removes a reaction', async () => {
     const { store } = await loaded()
 
-    await store.dispatch(addReaction({ messageId, emoji: '🎉' }))
-    expect(selectReactionSummary(store.getState(), messageId)).toContainEqual({
-      emoji: '🎉',
-      count: 1,
-      reactedByCurrentUser: true,
-    })
-
     await store.dispatch(removeReaction({ messageId, emoji: '🚀' }))
-    expect(selectReactionSummary(store.getState(), messageId)).toContainEqual({
-      emoji: '🚀',
-      count: 2,
-      reactedByCurrentUser: false,
-    })
+    expect(selectReactionSummary(store.getState(), messageId)).toEqual([
+      { emoji: '🚀', count: 2, reactedByCurrentUser: false },
+    ])
+
+    await store.dispatch(addReaction({ messageId, emoji: '🎉' }))
+    expect(selectReactionSummary(store.getState(), messageId)).toEqual([
+      { emoji: '🚀', count: 2, reactedByCurrentUser: false },
+      { emoji: '🎉', count: 1, reactedByCurrentUser: true },
+    ])
+  })
+
+  it('replaces the user’s reaction, keeping everyone else’s', async () => {
+    const { store } = await loaded()
+
+    await store.dispatch(addReaction({ messageId, emoji: '🎉' }))
+
+    expect(selectReactionSummary(store.getState(), messageId)).toEqual([
+      { emoji: '🚀', count: 2, reactedByCurrentUser: false },
+      { emoji: '🎉', count: 1, reactedByCurrentUser: true },
+    ])
   })
 
   it('returns one shared empty list for messages without reactions', async () => {

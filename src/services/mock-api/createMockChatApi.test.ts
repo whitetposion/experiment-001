@@ -279,6 +279,28 @@ describe('reactions', () => {
     expect(message.reactions).toEqual([{ emoji: '🔥', userId: maya, reactedAt: NOW.toISOString() }])
   })
 
+  it("replaces the current user's reaction instead of adding a second one", async () => {
+    const api = createApi()
+
+    await api.addReaction({ messageId: othersMessage, emoji: '🔥' })
+    const message = await api.addReaction({ messageId: othersMessage, emoji: '❤️' })
+
+    expect(message.reactions).toEqual([{ emoji: '❤️', userId: maya, reactedAt: NOW.toISOString() }])
+  })
+
+  it("leaves other people's reactions when replacing", async () => {
+    const api = createApi()
+    const liked = toMessageId('message-priya-4')
+
+    await api.addReaction({ messageId: liked, emoji: '👍' })
+    const message = await api.addReaction({ messageId: liked, emoji: '😂' })
+
+    expect(message.reactions.map(({ emoji, userId }) => [emoji, userId])).toEqual([
+      ['❤️', toUserId('user-priya')],
+      ['😂', maya],
+    ])
+  })
+
   it("removes only the current user's reaction", async () => {
     const api = createApi()
     const liked = toMessageId('message-priya-4')

@@ -88,7 +88,7 @@ directly. Everything is `readonly`, because state changes go through reducers.
 
 Reducers and services own these, and their tests should cover them:
 
-- A user has at most one reaction with the same emoji on a message.
+- A user has at most one reaction on a message. Choosing another emoji replaces it.
 - Delivery status only moves forward: `sending`, `sent`, `delivered`, `read`. `failed` follows
   `sending`, and a retry returns to `sending`.
 - Only the sender can edit or delete a message.

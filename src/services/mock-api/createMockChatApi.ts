@@ -307,10 +307,11 @@ export function createMockChatApi({
           return message
         }
 
+        // One reaction per person, so a new emoji replaces their previous one.
         const updated: ActiveMessage = {
           ...message,
           reactions: [
-            ...message.reactions,
+            ...message.reactions.filter(({ userId }) => userId !== currentUserId),
             { emoji, userId: currentUserId, reactedAt: now().toISOString() },
           ],
         }

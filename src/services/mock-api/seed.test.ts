@@ -97,12 +97,12 @@ describe('mock seed', () => {
         }
       })
 
-      it('has reactions from members, once per user and emoji', () => {
+      it('has reactions from members, at most one per user', () => {
         for (const message of messages) {
           if (message.state === 'active') {
-            const keys = message.reactions.map(({ emoji, userId }) => `${userId}:${emoji}`)
+            const reactors = message.reactions.map(({ userId }) => userId)
 
-            expect(new Set(keys).size).toBe(keys.length)
+            expect(new Set(reactors).size).toBe(reactors.length)
             expect(message.reactions.every(({ userId }) => memberIds.has(userId))).toBe(true)
           }
         }

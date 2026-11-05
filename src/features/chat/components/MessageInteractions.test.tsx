@@ -172,6 +172,32 @@ describe('reactions', () => {
     })
   })
 
+  it('replaces the user’s reaction when they choose another', async () => {
+    const { user } = await renderChat()
+    await react(user, OTHER_TEXT, 'React with thumbs up')
+    await chip(OTHER_TEXT, /👍 1/)
+
+    await react(user, OTHER_TEXT, 'React with heart')
+
+    await chip(OTHER_TEXT, /❤️ 1/)
+    expect(within(bubble(OTHER_TEXT)).queryByRole('button', { name: /👍/ })).toBeNull()
+
+    await openMenu(user, OTHER_TEXT)
+    expect(screen.getByRole('menuitemcheckbox', { name: 'React with heart' })).toBeChecked()
+    expect(screen.getByRole('menuitemcheckbox', { name: 'React with thumbs up' })).not.toBeChecked()
+  })
+
+  it('moves the user’s reaction when they join someone else’s', async () => {
+    const { user } = await renderChat()
+    await react(user, OWN_TEXT, 'React with thumbs up')
+    await chip(OWN_TEXT, /👍 1/)
+
+    await user.click(await chip(OWN_TEXT, /🙌 1/))
+
+    await chip(OWN_TEXT, /🙌 2/)
+    expect(within(bubble(OWN_TEXT)).queryByRole('button', { name: /👍/ })).toBeNull()
+  })
+
   it('removes the user’s reaction from its chip', async () => {
     const { user } = await renderChat()
     await react(user, OTHER_TEXT, 'React with sad')

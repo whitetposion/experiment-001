@@ -6,7 +6,7 @@ import type { AttachmentId, ConversationId, IsoTimestamp, MessageId, UserId } fr
  */
 export type MessageDeliveryStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed'
 
-/** One user's emoji on one message. A user may add several different emoji. */
+/** One user's emoji on one message. Each user has at most one reaction per message. */
 export interface MessageReaction {
   readonly emoji: string
   readonly userId: UserId
