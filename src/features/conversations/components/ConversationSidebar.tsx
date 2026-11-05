@@ -59,7 +59,8 @@ export function ConversationSidebar({ searchResults }: ConversationSidebarProps)
         <ConversationFilters />
       </div>
       <div
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-2"
+        // relative keeps absolutely positioned screen reader text inside this scroller.
+        className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-2"
         onKeyDown={handleListKeyDown}
         ref={listRef}
         role="presentation"

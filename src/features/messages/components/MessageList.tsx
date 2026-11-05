@@ -110,7 +110,8 @@ export function MessageList({
     <div className="relative min-h-0 flex-1">
       <div
         aria-label="Messages"
-        className="flex h-full flex-col overflow-y-auto overscroll-contain p-3 md:px-gutter"
+        // relative keeps absolutely positioned screen reader text inside this scroller.
+        className="relative flex h-full flex-col overflow-y-auto overscroll-contain p-3 md:px-gutter"
         onScroll={handleScroll}
         ref={scrollerRef}
         role="log"

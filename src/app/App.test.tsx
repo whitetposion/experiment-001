@@ -17,6 +17,25 @@ const sidebarPanel = () => screen.getByRole('navigation', { name: 'Chats' }).par
 const conversationPanel = () => screen.getByRole('region', { name: 'Conversation' })
 
 describe('App', () => {
+  // jsdom has no layout, so these guard the two rules that keep the app on screen. Without
+  // them, opening a long chat scrolled the whole shell away and cut off the header.
+  it('cannot be scrolled out of place by focus or scrollIntoView', async () => {
+    await renderApp()
+
+    expect(screen.getByRole('main')).toHaveClass('overflow-clip')
+    expect(screen.getByRole('main')).not.toHaveClass('overflow-hidden')
+  })
+
+  it('keeps screen reader text inside its scrolling list', async () => {
+    const { user } = await renderApp()
+    await user.click(screen.getByRole('button', { name: /Rohan Desai/ }))
+
+    expect(screen.getByRole('log')).toHaveClass('relative', 'overflow-y-auto')
+    expect(document.querySelector('[data-list-item]')?.closest('.overflow-y-auto')).toHaveClass(
+      'relative',
+    )
+  })
+
   it('keeps the main landmark and page heading around both panels', async () => {
     await renderApp()
     const main = screen.getByRole('main')

@@ -12,10 +12,14 @@ export interface AppShellProps {
   isMainActive: boolean
 }
 
-/** Two panels side by side from tablet width up, and one at a time on a phone. */
+/**
+ * Two panels side by side from tablet width up, and one at a time on a phone. The shell uses
+ * overflow-clip, not overflow-hidden: a hidden box can still be scrolled by focus() and
+ * scrollIntoView(), which pushes the whole app off screen.
+ */
 export function AppShell({ isMainActive, main, mainLabel, sidebar, title }: AppShellProps) {
   return (
-    <main className="grid h-dvh overflow-hidden pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] md:grid-cols-[20rem_minmax(0,1fr)] lg:grid-cols-[24rem_minmax(0,1fr)]">
+    <main className="grid h-dvh overflow-clip pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] md:grid-cols-[20rem_minmax(0,1fr)] lg:grid-cols-[24rem_minmax(0,1fr)]">
       <h1 className="sr-only">{title}</h1>
       <div className={cn('min-h-0 min-w-0 md:block', isMainActive && 'hidden')}>{sidebar}</div>
       <section
