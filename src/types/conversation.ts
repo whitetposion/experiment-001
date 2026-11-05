@@ -4,6 +4,10 @@ export type ConversationType = 'direct' | 'group'
 
 export type ParticipantRole = 'owner' | 'admin' | 'member'
 
+/** The one rule for who manages members, shared so the UI and the backend always agree. */
+export const canRoleManageMembers = (role: ParticipantRole | undefined) =>
+  role === 'owner' || role === 'admin'
+
 /** Unread state for the signed-in user. */
 export interface ConversationUnread {
   readonly count: number

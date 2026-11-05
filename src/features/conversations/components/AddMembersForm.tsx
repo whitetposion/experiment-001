@@ -3,10 +3,11 @@ import { useForm, useWatch } from 'react-hook-form'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
+import { FormError } from '@/components/ui/FormError'
 import { selectAddableUsers } from '@/features/conversations/state/selectors'
 import { addGroupMembers } from '@/features/conversations/state/thunks'
+import { getFailureMessage } from '@/lib/failureMessage'
 import { getInitials } from '@/lib/initials'
-import type { ApiFailure } from '@/services/apiError'
 import type { ConversationId } from '@/types/ids'
 
 interface AddMembersValues {
@@ -42,7 +43,7 @@ export function AddMembersForm({ conversationId, onDone }: AddMembersFormProps) 
       ).unwrap()
       onDone()
     } catch (failure) {
-      setError((failure as ApiFailure).message)
+      setError(getFailureMessage(failure))
     }
   }
 
@@ -81,11 +82,7 @@ export function AddMembersForm({ conversationId, onDone }: AddMembersFormProps) 
           </label>
         ))}
       </fieldset>
-      {error ? (
-        <p className="text-sm text-destructive" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {error ? <FormError>{error}</FormError> : null}
       <div className="flex justify-end gap-2">
         <Button onClick={onDone} size="sm" variant="secondary">
           Cancel

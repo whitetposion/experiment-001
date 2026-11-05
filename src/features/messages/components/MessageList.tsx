@@ -2,6 +2,7 @@ import { ArrowDown } from 'lucide-react'
 import { useCallback, useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { Button } from '@/components/ui/Button'
+import { ErrorRetry } from '@/components/ui/ErrorRetry'
 import { IconButton } from '@/components/ui/IconButton'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { useChatScroll } from '@/features/messages/hooks/useChatScroll'
@@ -121,20 +122,13 @@ export function MessageList({
         {isInitialLoad ? <ThreadSkeleton /> : null}
 
         {status === 'failed' ? (
-          <div className="m-auto flex flex-col items-center gap-2 text-center" role="alert">
-            <p className="text-sm text-muted-foreground">
-              {error?.message ?? 'Something went wrong. Try again.'}
-            </p>
-            <Button
-              onClick={() => {
-                loadPage(ids.length > 0 ? oldestId : undefined)
-              }}
-              size="sm"
-              variant="secondary"
-            >
-              Try again
-            </Button>
-          </div>
+          <ErrorRetry
+            className="m-auto items-center text-center"
+            message={error?.message}
+            onRetry={() => {
+              loadPage(ids.length > 0 ? oldestId : undefined)
+            }}
+          />
         ) : null}
 
         {status === 'succeeded' && ids.length === 0 ? (

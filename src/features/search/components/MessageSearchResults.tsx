@@ -1,6 +1,8 @@
 import { memo } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { Button } from '@/components/ui/Button'
+import { ErrorRetry } from '@/components/ui/ErrorRetry'
+import { listRowClasses } from '@/components/ui/listRow.variants'
+import { ScreenReaderPause } from '@/components/ui/ScreenReaderPause'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { selectConversationSearchQuery } from '@/features/conversations'
 import {
@@ -12,6 +14,7 @@ import {
 } from '@/features/search/state/selectors'
 import { searchMessages } from '@/features/search/state/thunks'
 import { openSearchResult } from '@/features/search/state/workflows'
+import { cn } from '@/lib/cn'
 import { formatConversationTime } from '@/lib/formatConversationTime'
 import { highlightMatch } from '@/lib/highlightMatch'
 import type { MessageId } from '@/types/ids'
@@ -33,7 +36,7 @@ const MessageResult = memo(function MessageResult({
   return (
     <li>
       <button
-        className="flex w-full flex-col gap-0.5 rounded-lg px-3 py-2 text-left transition-colors duration-fast hover:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2"
+        className={cn(listRowClasses, 'flex-col gap-0.5 hover:bg-muted')}
         data-list-item
         onClick={() => {
           void dispatch(openSearchResult(messageId))
@@ -45,12 +48,12 @@ const MessageResult = memo(function MessageResult({
             {view.conversationTitle}
           </span>
           <time className="shrink-0 text-xs text-muted-foreground" dateTime={view.sentAt}>
-            <span className="sr-only">, </span>
+            <ScreenReaderPause />
             {formatConversationTime(view.sentAt)}
           </time>
         </span>
         <span className="truncate text-sm text-muted-foreground">
-          <span className="sr-only">, </span>
+          <ScreenReaderPause />
           {view.senderLabel}:{' '}
           {highlightMatch(view.text, query).map(({ isMatch, text }) =>
             isMatch ? (
@@ -102,20 +105,13 @@ export function MessageSearchResults() {
       ) : null}
 
       {status === 'failed' ? (
-        <div className="flex flex-col items-start gap-2 px-3" role="alert">
-          <p className="text-sm text-muted-foreground">
-            {error?.message ?? 'Something went wrong. Try again.'}
-          </p>
-          <Button
-            onClick={() => {
-              void dispatch(searchMessages(query))
-            }}
-            size="sm"
-            variant="secondary"
-          >
-            Try again
-          </Button>
-        </div>
+        <ErrorRetry
+          className="items-start px-3"
+          message={error?.message}
+          onRetry={() => {
+            void dispatch(searchMessages(query))
+          }}
+        />
       ) : null}
 
       {status === 'succeeded' && ids.length === 0 ? (

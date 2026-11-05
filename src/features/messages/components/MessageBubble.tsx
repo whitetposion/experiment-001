@@ -1,17 +1,17 @@
 import { Ban } from 'lucide-react'
 import { memo } from 'react'
-import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { useAppSelector } from '@/app/hooks'
 import { Avatar } from '@/components/ui/Avatar'
+import { useToggleReaction } from '@/features/messages/hooks/useToggleReaction'
 import {
   selectMessageView,
   type ReactionSummary,
   type ReplyPreview,
 } from '@/features/messages/state/selectors'
-import { toggleReaction } from '@/features/messages/state/workflows'
-import type { ApiFailure } from '@/services/apiError'
 import { cn } from '@/lib/cn'
 import { formatMessageDay } from '@/lib/formatMessageDate'
 import { getInitials } from '@/lib/initials'
+import { deletedMessageLabel } from '@/lib/senderLabels'
 import type { MessageId } from '@/types/ids'
 import { MessageActions } from './MessageActions'
 import { MessageStatusIndicator } from './MessageStatusIndicator'
@@ -54,7 +54,7 @@ function ReactionChip({
   onNotice: (message: string) => void
   reaction: ReactionSummary
 }) {
-  const dispatch = useAppDispatch()
+  const toggle = useToggleReaction(messageId, onNotice)
   const { count, emoji, reactedByCurrentUser } = reaction
 
   return (
@@ -68,9 +68,7 @@ function ReactionChip({
         reactedByCurrentUser && 'ring-1 ring-primary',
       )}
       onClick={() => {
-        dispatch(toggleReaction({ messageId, emoji })).catch((failure: unknown) => {
-          onNotice((failure as ApiFailure).message)
-        })
+        toggle(emoji)
       }}
       type="button"
     >
@@ -162,7 +160,7 @@ export const MessageBubble = memo(function MessageBubble({
           ) : (
             <p className="flex items-center gap-1 italic opacity-80">
               <Ban aria-hidden="true" className="size-4 shrink-0" />
-              {isOwn ? 'You deleted this message' : 'This message was deleted'}
+              {deletedMessageLabel(isOwn)}
             </p>
           )}
           <div

@@ -1,4 +1,5 @@
 import { calendarDaysBetween } from './calendar'
+import { formatMessageTime } from './formatMessageDate'
 
 /** A short time for lists: a clock time today, then Yesterday, a weekday, and a date. */
 export function formatConversationTime(timestamp: string, now = new Date()) {
@@ -6,7 +7,7 @@ export function formatConversationTime(timestamp: string, now = new Date()) {
   const days = calendarDaysBetween(date, now)
 
   if (days <= 0) {
-    return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    return formatMessageTime(timestamp)
   }
 
   if (days === 1) {
@@ -18,4 +19,8 @@ export function formatConversationTime(timestamp: string, now = new Date()) {
   }
 
   return date.toLocaleDateString(undefined, { day: 'numeric', month: 'numeric', year: '2-digit' })
+}
+
+export function formatLastSeen(timestamp: string) {
+  return `Last seen ${formatConversationTime(timestamp)}`
 }

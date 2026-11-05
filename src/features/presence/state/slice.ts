@@ -1,6 +1,6 @@
 import { createEntityAdapter, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { ApiFailure } from '@/services/apiError'
-import type { ConversationId, UserId } from '@/types/ids'
+import { conversationMemberKey, type ConversationId, type UserId } from '@/types/ids'
 import type { TypingIndicator, UserPresence } from '@/types/presence'
 import type { RequestStatus } from '@/types/request'
 import type { User } from '@/types/user'
@@ -12,11 +12,8 @@ export const presenceAdapter = createEntityAdapter<UserPresence, UserId>({
   selectId: ({ userId }) => userId,
 })
 
-export const typingKey = (conversationId: ConversationId, userId: UserId) =>
-  `${conversationId}:${userId}`
-
 export const typingAdapter = createEntityAdapter<TypingIndicator, string>({
-  selectId: ({ conversationId, userId }) => typingKey(conversationId, userId),
+  selectId: ({ conversationId, userId }) => conversationMemberKey(conversationId, userId),
 })
 
 export interface PresenceState {
@@ -52,7 +49,7 @@ export const presenceSlice = createSlice({
       action: PayloadAction<{ conversationId: ConversationId; userId: UserId }>,
     ) {
       const { conversationId, userId } = action.payload
-      typingAdapter.removeOne(state.typing, typingKey(conversationId, userId))
+      typingAdapter.removeOne(state.typing, conversationMemberKey(conversationId, userId))
     },
   },
   extraReducers: (builder) => {

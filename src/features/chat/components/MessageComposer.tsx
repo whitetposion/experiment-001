@@ -1,12 +1,13 @@
 import { Check, SendHorizontal, X } from 'lucide-react'
 import { useState, type KeyboardEvent, type Ref, type SubmitEvent } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { FormError } from '@/components/ui/FormError'
 import { IconButton } from '@/components/ui/IconButton'
 import { Textarea } from '@/components/ui/Textarea'
 import { editMessage, selectMessageView, sendMessage } from '@/features/messages'
 import { composerTargetChanged, selectComposerTarget } from '@/features/ui'
+import { getFailureMessage } from '@/lib/failureMessage'
 import { isCoarsePointer } from '@/lib/pointer'
-import type { ApiFailure } from '@/services/apiError'
 import type { ConversationId, MessageId } from '@/types/ids'
 
 function ComposerBanner({
@@ -117,7 +118,7 @@ export function MessageComposer({ conversationId, inputRef }: MessageComposerPro
     try {
       await (isEditing ? saveEdit(target.messageId) : send())
     } catch (failure) {
-      setError((failure as ApiFailure).message)
+      setError(getFailureMessage(failure))
     } finally {
       setIsBusy(false)
     }
@@ -165,11 +166,7 @@ export function MessageComposer({ conversationId, inputRef }: MessageComposerPro
           title={`Replying to ${targetView?.senderName ?? 'message'}`}
         />
       ) : null}
-      {error ? (
-        <p className="px-2 text-sm text-destructive" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {error ? <FormError className="px-2">{error}</FormError> : null}
       <div className="flex items-end gap-2">
         <Textarea
           aria-label={isEditing ? 'Edit message' : 'Message'}

@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { fetchDirectory } from '@/features/presence'
-import { TEST_NOW, createTestStore } from '@/test/store'
-import { toConversationId, toMessageId, toUserId } from '@/types/ids'
-import type { ActiveMessage, MessageDeliveryStatus } from '@/types/message'
+import { incomingMessage } from '@/test/fixtures'
+import { createTestStore } from '@/test/store'
+import { toConversationId, toMessageId } from '@/types/ids'
+import type { MessageDeliveryStatus } from '@/types/message'
 import { canChangeDeliveryStatus } from './deliveryStatus'
 import {
   selectIsOwnMessage,
@@ -28,21 +29,7 @@ const rohan = toConversationId('conversation-rohan')
 const launch = toConversationId('conversation-launch')
 const ownMessage = toMessageId('message-rohan-4')
 
-function incoming(id: string): ActiveMessage {
-  return {
-    id: toMessageId(id),
-    conversationId: rohan,
-    senderId: toUserId('user-rohan'),
-    createdAt: TEST_NOW.toISOString(),
-    replyToMessageId: null,
-    deliveryStatus: 'delivered',
-    state: 'active',
-    text: 'Incoming',
-    editedAt: null,
-    reactions: [],
-    attachments: [],
-  }
-}
+const incoming = (id: string) => incomingMessage(rohan, id)
 
 describe('loading a thread', () => {
   it('tracks status and stores messages by ID, in order', async () => {

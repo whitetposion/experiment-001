@@ -1,3 +1,4 @@
+import { randomInRange, type NumberRange } from '@/lib/createRandom'
 import { ApiError } from '@/services/apiError'
 import type {
   ChatApi,
@@ -6,7 +7,12 @@ import type {
   GroupMembersResponse,
   RequestOptions,
 } from '@/services/chatApi'
-import type { Conversation, ConversationParticipant, GroupConversation } from '@/types/conversation'
+import {
+  canRoleManageMembers,
+  type Conversation,
+  type ConversationParticipant,
+  type GroupConversation,
+} from '@/types/conversation'
 import { toMessageId, type ConversationId, type MessageId, type UserId } from '@/types/ids'
 import type { ActiveMessage, DeletedMessage, Message, MessageDeliveryStatus } from '@/types/message'
 import type { PresenceStatus } from '@/types/presence'
@@ -22,7 +28,7 @@ export interface MockChatApiOptions {
   /** The clock, replaceable so tests are repeatable. */
   now?: () => Date
   /** Each request waits a random time in this range. */
-  latencyMs?: { min: number; max: number }
+  latencyMs?: NumberRange
   /** The chance from 0 to 1 that any request fails with a network error. */
   failureRate?: number
   /** Returns a number from 0 up to 1, replaceable so tests are repeatable. */
@@ -59,6 +65,30 @@ export interface MockChatApi extends ChatApi {
 
 function networkError() {
   return new ApiError('network', 'Could not reach the server. Check your connection and try again.')
+}
+
+function conversationUnavailable() {
+  return new ApiError('not-found', 'This conversation is no longer available.')
+}
+
+function messageUnavailable() {
+  return new ApiError('not-found', 'This message is no longer available.')
+}
+
+/** Every new message starts the same way, whoever sent it. */
+function createActiveMessage(
+  fields: Pick<
+    ActiveMessage,
+    | 'id'
+    | 'conversationId'
+    | 'senderId'
+    | 'createdAt'
+    | 'replyToMessageId'
+    | 'deliveryStatus'
+    | 'text'
+  >,
+): ActiveMessage {
+  return { ...fields, state: 'active', editedAt: null, reactions: [], attachments: [] }
 }
 
 function requireText(text: string) {
@@ -99,8 +129,7 @@ export function createMockChatApi({
 
   /** Every call passes through here, so all of them get latency, failures and isolation. */
   async function request<Result>(handler: () => Result, options?: RequestOptions) {
-    const { min, max } = latencyMs
-    await delay(min + random() * (max - min), options?.signal)
+    await delay(randomInRange(latencyMs, random), options?.signal)
 
     const queuedFailure = queuedFailures.shift()
 
@@ -129,10 +158,14 @@ export function createMockChatApi({
     const conversation = conversations.get(conversationId)
 
     if (!conversation || !membership(conversationId, currentUserId)) {
-      throw new ApiError('not-found', 'This conversation is no longer available.')
+      throw conversationUnavailable()
     }
 
     return conversation
+  }
+
+  function visibleConversations() {
+    return [...conversations.values()].filter(({ id }) => membership(id, currentUserId))
   }
 
   function findGroup(conversationId: ConversationId): GroupConversation {
@@ -152,7 +185,7 @@ export function createMockChatApi({
     const message = messages.get(messageId)
 
     if (!message) {
-      throw new ApiError('not-found', 'This message is no longer available.')
+      throw messageUnavailable()
     }
 
     findConversation(message.conversationId)
@@ -186,8 +219,7 @@ export function createMockChatApi({
   }
 
   function canManageMembers(conversationId: ConversationId) {
-    const role = membership(conversationId, currentUserId)?.role
-    return role === 'owner' || role === 'admin'
+    return canRoleManageMembers(membership(conversationId, currentUserId)?.role)
   }
 
   function saveGroup(
@@ -202,8 +234,7 @@ export function createMockChatApi({
   const backend: MockBackend = {
     currentUserId,
 
-    getConversations: () =>
-      [...conversations.values()].filter(({ id }) => membership(id, currentUserId)),
+    getConversations: visibleConversations,
 
     isMember: (conversationId, userId) => membership(conversationId, userId) !== undefined,
 
@@ -242,19 +273,15 @@ export function createMockChatApi({
       }
 
       const createdAt = now().toISOString()
-      const message: ActiveMessage = {
+      const message = createActiveMessage({
         id: toMessageId(`message-received-${String(nextReceivedNumber)}`),
         conversationId,
         senderId,
         createdAt,
         replyToMessageId: null,
         deliveryStatus: 'delivered',
-        state: 'active',
         text,
-        editedAt: null,
-        reactions: [],
-        attachments: [],
-      }
+      })
 
       nextReceivedNumber += 1
       messages.set(message.id, message)
@@ -340,9 +367,9 @@ export function createMockChatApi({
 
     getConversations: (options) =>
       request(() => {
-        const visible = [...conversations.values()]
-          .filter(({ id }) => membership(id, currentUserId))
-          .sort((first, second) => second.updatedAt.localeCompare(first.updatedAt))
+        const visible = visibleConversations().sort((first, second) =>
+          second.updatedAt.localeCompare(first.updatedAt),
+        )
 
         return {
           conversations: visible,
@@ -367,7 +394,7 @@ export function createMockChatApi({
         const end = before ? all.findIndex(({ id }) => id === before) : all.length
 
         if (end === -1) {
-          throw new ApiError('not-found', 'This message is no longer available.')
+          throw messageUnavailable()
         }
 
         const start = Math.max(0, end - limit)
@@ -404,19 +431,15 @@ export function createMockChatApi({
         }
 
         const createdAt = now().toISOString()
-        const message: ActiveMessage = {
+        const message = createActiveMessage({
           id: toMessageId(`message-sent-${String(nextMessageNumber)}`),
           conversationId,
           senderId: currentUserId,
           createdAt,
           replyToMessageId: replyToMessageId ?? null,
           deliveryStatus: 'sent',
-          state: 'active',
           text: trimmed,
-          editedAt: null,
-          reactions: [],
-          attachments: [],
-        }
+        })
 
         nextMessageNumber += 1
         messages.set(message.id, message)
@@ -520,7 +543,7 @@ export function createMockChatApi({
         const participant = membership(conversationId, currentUserId)
 
         if (!participant) {
-          throw new ApiError('not-found', 'This conversation is no longer available.')
+          throw conversationUnavailable()
         }
 
         const updatedConversation: Conversation = {

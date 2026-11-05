@@ -1,25 +1,26 @@
+import { randomInRange, type NumberRange } from '@/lib/createRandom'
 import type { MockBackend } from '@/services/mock-api/createMockChatApi'
 import type { Conversation } from '@/types/conversation'
-import type { ConversationId, MessageId, UserId } from '@/types/ids'
+import {
+  conversationMemberKey,
+  type ConversationId,
+  type MessageId,
+  type UserId,
+} from '@/types/ids'
 import type { ActiveMessage } from '@/types/message'
-
-interface Range {
-  readonly min: number
-  readonly max: number
-}
 
 export interface SimulationTiming {
   /** From a message being sent to it being delivered. */
-  readonly deliveredAfterMs: Range
+  readonly deliveredAfterMs: NumberRange
   /** From delivered to read. */
-  readonly readAfterMs: Range
+  readonly readAfterMs: NumberRange
   /** From read to the other person starting to type. */
-  readonly replyAfterMs: Range
-  readonly typingForMs: Range
+  readonly replyAfterMs: NumberRange
+  readonly typingForMs: NumberRange
   /** The time between someone going online or offline. */
-  readonly presenceEveryMs: Range
+  readonly presenceEveryMs: NumberRange
   /** The time between messages that nobody prompted. */
-  readonly incomingEveryMs: Range
+  readonly incomingEveryMs: NumberRange
 }
 
 export const DEFAULT_TIMING: SimulationTiming = {
@@ -85,7 +86,7 @@ export function createChatSimulation(
   const deliveringIds = new Set<MessageId>()
   let stopListening: (() => void) | null = null
 
-  const between = ({ max, min }: Range) => min + random() * (max - min)
+  const between = (range: NumberRange) => randomInRange(range, random)
 
   function pick<Item>(items: readonly Item[]): Item | undefined {
     return items[Math.floor(random() * items.length)]
@@ -104,7 +105,7 @@ export function createChatSimulation(
     conversation.participantIds.filter((id) => id !== currentUserId)
 
   function typeThenSend(conversationId: ConversationId, userId: UserId, lines: readonly string[]) {
-    const key = `${conversationId}:${userId}`
+    const key = conversationMemberKey(conversationId, userId)
     const text = pick(lines)
 
     if (

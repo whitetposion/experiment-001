@@ -1,6 +1,7 @@
 import { createAppSelector, type RootState } from '@/app/hooks'
 import { selectCurrentUserId, selectUserEntities } from '@/features/presence'
 import { isSameDay } from '@/lib/calendar'
+import { deletedMessageLabel, UNKNOWN_CONTACT } from '@/lib/senderLabels'
 import type { ConversationId, MessageId } from '@/types/ids'
 import type { Message } from '@/types/message'
 import { EMPTY_THREAD, messagesAdapter } from './slice'
@@ -122,7 +123,7 @@ export const selectMessageView = createAppSelector(
     const nameOf = (sender: Message) =>
       sender.senderId === currentUserId
         ? 'You'
-        : (users[sender.senderId]?.displayName ?? 'Unknown contact')
+        : (users[sender.senderId]?.displayName ?? UNKNOWN_CONTACT)
 
     function replyPreview(): ReplyPreview | null {
       // A deleted message shows none of its content, and that includes what it quoted.
@@ -136,7 +137,7 @@ export const selectMessageView = createAppSelector(
 
       return {
         senderName: nameOf(replyTarget),
-        text: replyTarget.state === 'active' ? replyTarget.text : 'This message was deleted',
+        text: replyTarget.state === 'active' ? replyTarget.text : deletedMessageLabel(false),
       }
     }
 

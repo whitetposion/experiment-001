@@ -1,6 +1,7 @@
 import { Users } from 'lucide-react'
 import { useAppSelector } from '@/app/hooks'
 import { Avatar, type AvatarProps } from '@/components/ui/Avatar'
+import { OnlineDot } from '@/components/ui/OnlineDot'
 import {
   selectConversationAvatarUrl,
   selectConversationById,
@@ -35,9 +36,7 @@ export function ConversationAvatar({ conversationId, size = 'lg' }: Conversation
         size={size}
         src={src ?? undefined}
       />
-      {isOnline ? (
-        <span className="absolute right-0 bottom-0 size-3.5 rounded-pill border-2 border-surface bg-success" />
-      ) : null}
+      {isOnline ? <OnlineDot className="size-3.5 border-surface" /> : null}
     </span>
   )
 }

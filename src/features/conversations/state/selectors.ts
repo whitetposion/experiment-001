@@ -10,12 +10,18 @@ import {
   selectUserEntities,
   selectUserPresence,
 } from '@/features/presence'
-import { formatConversationTime } from '@/lib/formatConversationTime'
-import type { Conversation, ConversationFilter, ParticipantRole } from '@/types/conversation'
-import type { ConversationId, UserId } from '@/types/ids'
+import { formatLastSeen } from '@/lib/formatConversationTime'
+import { deletedMessageLabel, firstName, UNKNOWN_CONTACT } from '@/lib/senderLabels'
+import {
+  canRoleManageMembers,
+  type Conversation,
+  type ConversationFilter,
+  type ParticipantRole,
+} from '@/types/conversation'
+import { conversationMemberKey, type ConversationId, type UserId } from '@/types/ids'
 import type { MessageDeliveryStatus } from '@/types/message'
 import type { User } from '@/types/user'
-import { conversationsAdapter, participantKey, participantsAdapter } from './slice'
+import { conversationsAdapter, participantsAdapter } from './slice'
 
 const adapterSelectors = conversationsAdapter.getSelectors(
   (state: RootState) => state.conversations,
@@ -23,8 +29,6 @@ const adapterSelectors = conversationsAdapter.getSelectors(
 const participantSelectors = participantsAdapter.getSelectors(
   (state: RootState) => state.conversations.participants,
 )
-
-const UNKNOWN_CONTACT = 'Unknown contact'
 
 export const selectConversationById = adapterSelectors.selectById
 export const selectAllConversations = adapterSelectors.selectAll
@@ -47,6 +51,18 @@ export const selectSelectedConversation = (state: RootState) => {
 function otherParticipantId(conversation: Conversation, currentUserId: UserId | null) {
   return conversation.participantIds.find((id) => id !== currentUserId)
 }
+
+/** The other person in a direct conversation. Groups have no single contact. */
+const selectDirectContactId = (state: RootState, conversationId: ConversationId) => {
+  const conversation = selectConversationById(state, conversationId)
+
+  return conversation?.type === 'direct'
+    ? otherParticipantId(conversation, selectCurrentUserId(state))
+    : undefined
+}
+
+export const selectIsGroupConversation = (state: RootState, conversationId: ConversationId) =>
+  selectConversationById(state, conversationId)?.type === 'group'
 
 function titleOf(
   conversation: Conversation,
@@ -78,7 +94,7 @@ export const selectConversationAvatarUrl = (state: RootState, conversationId: Co
     return conversation?.avatarUrl ?? null
   }
 
-  const otherId = otherParticipantId(conversation, selectCurrentUserId(state))
+  const otherId = selectDirectContactId(state, conversationId)
   return (otherId && selectUserEntities(state)[otherId]?.avatarUrl) ?? null
 }
 
@@ -130,7 +146,8 @@ export const selectParticipants = createAppSelector(
   [selectConversationById, participantSelectors.selectEntities],
   (conversation, participants) =>
     (conversation?.participantIds ?? []).flatMap((userId) => {
-      const participant = conversation && participants[participantKey(conversation.id, userId)]
+      const participant =
+        conversation && participants[conversationMemberKey(conversation.id, userId)]
       return participant ? [participant] : []
     }),
   { memoizeOptions: { resultEqualityCheck: shallowEqual } },
@@ -138,13 +155,7 @@ export const selectParticipants = createAppSelector(
 
 /** Whether the other person in a direct conversation is online. Groups have no single answer. */
 export const selectIsDirectContactOnline = (state: RootState, conversationId: ConversationId) => {
-  const conversation = selectConversationById(state, conversationId)
-
-  if (conversation?.type !== 'direct') {
-    return false
-  }
-
-  const otherId = otherParticipantId(conversation, selectCurrentUserId(state))
+  const otherId = selectDirectContactId(state, conversationId)
   return otherId ? selectIsUserOnline(state, otherId) : false
 }
 
@@ -160,14 +171,14 @@ export const selectConversationSubtitle = (state: RootState, conversationId: Con
     return `${String(conversation.participantIds.length)} members`
   }
 
-  const otherId = otherParticipantId(conversation, selectCurrentUserId(state))
+  const otherId = selectDirectContactId(state, conversationId)
   const presence = otherId ? selectUserPresence(state, otherId) : undefined
 
   if (presence?.status === 'online') {
     return 'Online'
   }
 
-  return presence?.lastSeenAt ? `Last seen ${formatConversationTime(presence.lastSeenAt)}` : ''
+  return presence?.lastSeenAt ? formatLastSeen(presence.lastSeenAt) : ''
 }
 
 /** Who is typing, in words, or null. A string, so it only updates when the words change. */
@@ -185,15 +196,15 @@ export const selectTypingLabel = (state: RootState, conversationId: Conversation
   }
 
   const users = selectUserEntities(state)
-  const firstName = (userId: UserId) => users[userId]?.displayName.split(' ')[0] ?? 'Someone'
+  const nameOf = (userId: UserId) => firstName(users[userId]?.displayName) ?? 'Someone'
 
   if (typingIds.length > 2) {
     return 'Several people are typing…'
   }
 
   return secondId
-    ? `${firstName(firstId)} and ${firstName(secondId)} are typing…`
-    : `${firstName(firstId)} is typing…`
+    ? `${nameOf(firstId)} and ${nameOf(secondId)} are typing…`
+    : `${nameOf(firstId)} is typing…`
 }
 
 export const selectCanManageMembers = (state: RootState, conversationId: ConversationId) => {
@@ -205,10 +216,10 @@ export const selectCanManageMembers = (state: RootState, conversationId: Convers
 
   const role = participantSelectors.selectById(
     state,
-    participantKey(conversationId, currentUserId),
+    conversationMemberKey(conversationId, currentUserId),
   )?.role
 
-  return role === 'owner' || role === 'admin'
+  return canRoleManageMembers(role)
 }
 
 export const selectGroupCreatorName = (state: RootState, conversationId: ConversationId) => {
@@ -240,8 +251,9 @@ const ROLE_ORDER: Record<ParticipantRole, number> = { owner: 0, admin: 1, member
 export const selectGroupMembers = createAppSelector(
   [selectParticipants, selectUserEntities, selectPresenceEntities, selectCurrentUserId],
   (participants, users, presence, currentUserId): readonly GroupMemberView[] => {
-    const ownRole = participants.find(({ userId }) => userId === currentUserId)?.role
-    const canManage = ownRole === 'owner' || ownRole === 'admin'
+    const canManage = canRoleManageMembers(
+      participants.find(({ userId }) => userId === currentUserId)?.role,
+    )
 
     return participants
       .map(({ role, userId }) => {
@@ -302,14 +314,14 @@ export const selectConversationPreview = createAppSelector(
     if (message.state === 'deleted') {
       return {
         senderLabel: null,
-        text: isOwn ? 'You deleted this message' : 'This message was deleted',
+        text: deletedMessageLabel(isOwn),
         isDeleted: true,
         sentAt,
         deliveryStatus: null,
       }
     }
 
-    const senderName = users[message.senderId]?.displayName.split(' ')[0] ?? null
+    const senderName = firstName(users[message.senderId]?.displayName) ?? null
 
     return {
       senderLabel: isOwn ? 'You' : conversation.type === 'group' ? senderName : null,

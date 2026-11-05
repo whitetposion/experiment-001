@@ -1,7 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import { bootstrapApp } from '@/app/bootstrap'
 import {
   conversationSelected,
   openConversation,
@@ -9,8 +8,7 @@ import {
 } from '@/features/conversations'
 import { selectMessageById, selectThreadMessageIds, sendMessage } from '@/features/messages'
 import { selectComposerTarget } from '@/features/ui'
-import { renderWithProviders } from '@/test/render'
-import { createTestStore } from '@/test/store'
+import { renderLoaded } from '@/test/render'
 import { toConversationId, toMessageId, type ConversationId } from '@/types/ids'
 import { ChatWindow } from './ChatWindow'
 
@@ -22,13 +20,8 @@ const OWN_TEXT = 'Deal. 5k it is'
 const OTHER_TEXT = 'Want me to sign us both up?'
 const ownMessage = toMessageId('message-rohan-4')
 
-async function renderChat(conversationId: ConversationId = rohan) {
-  const context = createTestStore()
-  await context.store.dispatch(bootstrapApp())
-  await context.store.dispatch(openConversation(conversationId))
-  renderWithProviders(<ChatWindow />, { store: context.store })
-  return { ...context, user: userEvent.setup() }
-}
+const renderChat = (conversationId: ConversationId = rohan) =>
+  renderLoaded(<ChatWindow />, { conversationId })
 
 type User = ReturnType<typeof userEvent.setup>
 

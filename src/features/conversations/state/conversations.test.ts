@@ -8,9 +8,9 @@ import {
   sendMessage,
 } from '@/features/messages'
 import { fetchDirectory, presenceChanged, typingStarted } from '@/features/presence'
+import { incomingMessage } from '@/test/fixtures'
 import { TEST_NOW, createTestStore } from '@/test/store'
-import { toConversationId, toMessageId, toUserId, type ConversationId } from '@/types/ids'
-import type { ActiveMessage } from '@/types/message'
+import { toConversationId, toMessageId, toUserId } from '@/types/ids'
 import {
   selectAddableUsers,
   selectAllConversations,
@@ -50,22 +50,6 @@ async function loaded() {
   await context.store.dispatch(fetchDirectory())
   await context.store.dispatch(fetchConversations())
   return context
-}
-
-function incoming(conversationId: ConversationId, id: string, createdAt = TEST_NOW): ActiveMessage {
-  return {
-    id: toMessageId(id),
-    conversationId,
-    senderId: toUserId('user-rohan'),
-    createdAt: createdAt.toISOString(),
-    replyToMessageId: null,
-    deliveryStatus: 'delivered',
-    state: 'active',
-    text: 'Incoming',
-    editedAt: null,
-    reactions: [],
-    attachments: [],
-  }
 }
 
 describe('loading', () => {
@@ -246,7 +230,7 @@ describe('reacting to messages', () => {
   it('counts an incoming message as unread in a closed conversation', async () => {
     const { store } = await loaded()
 
-    store.dispatch(messageReceived(incoming(priya, 'message-new')))
+    store.dispatch(messageReceived(incomingMessage(priya, 'message-new')))
 
     expect(selectVisibleConversationIds(store.getState())[0]).toBe(priya)
     expect(selectConversationById(store.getState(), priya)?.unread).toEqual({
@@ -258,8 +242,8 @@ describe('reacting to messages', () => {
   it('keeps the first unread position as more messages arrive', async () => {
     const { store } = await loaded()
 
-    store.dispatch(messageReceived(incoming(priya, 'message-a')))
-    store.dispatch(messageReceived(incoming(priya, 'message-b')))
+    store.dispatch(messageReceived(incomingMessage(priya, 'message-a')))
+    store.dispatch(messageReceived(incomingMessage(priya, 'message-b')))
 
     expect(selectConversationById(store.getState(), priya)?.unread).toEqual({
       count: 2,
@@ -271,7 +255,7 @@ describe('reacting to messages', () => {
     const { store } = await loaded()
     store.dispatch(conversationSelected(priya))
 
-    store.dispatch(messageReceived(incoming(priya, 'message-new')))
+    store.dispatch(messageReceived(incomingMessage(priya, 'message-new')))
 
     expect(selectUnreadCount(store.getState(), priya)).toBe(0)
     expect(selectConversationById(store.getState(), priya)?.lastMessageId).toBe('message-new')
@@ -281,7 +265,7 @@ describe('reacting to messages', () => {
     const { store } = await loaded()
     const before = store.getState().conversations
 
-    store.dispatch(messageReceived(incoming(toConversationId('missing'), 'message-new')))
+    store.dispatch(messageReceived(incomingMessage(toConversationId('missing'), 'message-new')))
 
     expect(store.getState().conversations).toBe(before)
   })
@@ -321,7 +305,7 @@ describe('opening a conversation', () => {
   it('does not lose a newer message to a slower read response', async () => {
     const { store } = await loaded()
     const read = store.dispatch(markConversationRead(rohan))
-    store.dispatch(messageReceived(incoming(rohan, 'message-newer')))
+    store.dispatch(messageReceived(incomingMessage(rohan, 'message-newer')))
 
     await read
 
@@ -395,7 +379,7 @@ describe('group member views', () => {
     const { store } = await loaded()
     const before = selectGroupMembers(store.getState(), launch)
 
-    store.dispatch(messageReceived(incoming(priya, 'message-new')))
+    store.dispatch(messageReceived(incomingMessage(priya, 'message-new')))
 
     expect(selectGroupMembers(store.getState(), launch)).toBe(before)
   })
@@ -456,7 +440,7 @@ describe('selector stability', () => {
     const { store } = await loaded()
     const before = selectVisibleConversationIds(store.getState())
 
-    store.dispatch(messageReceived(incoming(priya, 'message-new')))
+    store.dispatch(messageReceived(incomingMessage(priya, 'message-new')))
 
     expect(selectVisibleConversationIds(store.getState())).not.toBe(before)
   })
@@ -465,7 +449,7 @@ describe('selector stability', () => {
     const { store } = await loaded()
     const before = selectConversationPreview(store.getState(), rohan)
 
-    store.dispatch(messageReceived(incoming(priya, 'message-new')))
+    store.dispatch(messageReceived(incomingMessage(priya, 'message-new')))
 
     expect(selectConversationPreview(store.getState(), rohan)).toBe(before)
   })

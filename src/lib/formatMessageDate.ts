@@ -25,8 +25,7 @@ export function formatMessageDay(timestamp: string, now = new Date()) {
     return 'Yesterday'
   }
 
-  return date.toLocaleDateString(
-    undefined,
-    days < 7 ? { weekday: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' },
-  )
+  return days < 7
+    ? date.toLocaleDateString(undefined, { weekday: 'long' })
+    : formatFullDate(timestamp)
 }

@@ -1,7 +1,9 @@
+import { shallowEqual } from 'react-redux'
 import { createAppSelector, type RootState } from '@/app/hooks'
 import { selectConversationSearchQuery, selectConversationTitle } from '@/features/conversations'
 import { selectMessageById } from '@/features/messages'
 import { selectCurrentUserId, selectUserEntities } from '@/features/presence'
+import { firstName, UNKNOWN_CONTACT } from '@/lib/senderLabels'
 import type { MessageId } from '@/types/ids'
 import { MIN_QUERY_LENGTH } from './slice'
 
@@ -15,12 +17,8 @@ export const selectIsMessageSearchActive = (state: RootState) =>
 export const selectMessageSearchResultIds = createAppSelector(
   [(state: RootState) => state.search.resultIds, (state: RootState) => state.messages.entities],
   (ids, messages) => ids.filter((id) => messages[id]?.state === 'active'),
-  { memoizeOptions: { resultEqualityCheck: shallowEqualIds } },
+  { memoizeOptions: { resultEqualityCheck: shallowEqual } },
 )
-
-function shallowEqualIds(first: readonly MessageId[], second: readonly MessageId[]) {
-  return first.length === second.length && first.every((id, index) => id === second[index])
-}
 
 export interface MessageSearchResultView {
   readonly conversationTitle: string
@@ -45,7 +43,7 @@ export const selectMessageSearchResultView = createAppSelector(
     const senderLabel =
       message.senderId === currentUserId
         ? 'You'
-        : (users[message.senderId]?.displayName.split(' ')[0] ?? 'Unknown contact')
+        : (firstName(users[message.senderId]?.displayName) ?? UNKNOWN_CONTACT)
 
     return { conversationTitle, senderLabel, text: message.text, sentAt: message.createdAt }
   },

@@ -1,17 +1,9 @@
 import { screen, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { renderWithProviders } from '@/test/render'
-import { createTestStore } from '@/test/store'
+import { renderLoaded } from '@/test/render'
 import { App } from './App'
-import { bootstrapApp } from './bootstrap'
 
-async function renderApp() {
-  const { store } = createTestStore()
-  await store.dispatch(bootstrapApp())
-  renderWithProviders(<App />, { store })
-  return { user: userEvent.setup() }
-}
+const renderApp = () => renderLoaded(<App />)
 
 const sidebarPanel = () => screen.getByRole('navigation', { name: 'Chats' }).parentElement
 const conversationPanel = () => screen.getByRole('region', { name: 'Conversation' })

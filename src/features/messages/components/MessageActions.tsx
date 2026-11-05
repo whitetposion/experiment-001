@@ -1,6 +1,5 @@
 import { Copy, Ellipsis, Pencil, Reply, Trash2 } from 'lucide-react'
 import { useRef } from 'react'
-import { useAppDispatch } from '@/app/hooks'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +10,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
 import { IconButton } from '@/components/ui/IconButton'
+import { useToggleReaction } from '@/features/messages/hooks/useToggleReaction'
 import type { ReactionSummary } from '@/features/messages/state/selectors'
-import { toggleReaction } from '@/features/messages/state/workflows'
-import type { ApiFailure } from '@/services/apiError'
 import type { MessageId } from '@/types/ids'
 
 const QUICK_REACTIONS = [
@@ -48,7 +46,7 @@ export function MessageActions({
   senderName,
   text,
 }: MessageActionsProps) {
-  const dispatch = useAppDispatch()
+  const toggle = useToggleReaction(messageId, onNotice)
 
   // The menu returns focus to its button as it closes. An action that moves focus elsewhere,
   // to the composer or a dialog, waits for that moment so the two do not fight.
@@ -102,9 +100,7 @@ export function MessageActions({
               )}
               key={emoji}
               onCheckedChange={() => {
-                dispatch(toggleReaction({ messageId, emoji })).catch((failure: unknown) => {
-                  onNotice((failure as ApiFailure).message)
-                })
+                toggle(emoji)
               }}
             >
               {emoji}

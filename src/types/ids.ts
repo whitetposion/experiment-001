@@ -16,3 +16,7 @@ export const toUserId = (value: string) => value as UserId
 export const toConversationId = (value: string) => value as ConversationId
 export const toMessageId = (value: string) => value as MessageId
 export const toAttachmentId = (value: string) => value as AttachmentId
+
+/** Identifies one person in one conversation, such as a membership or a typing indicator. */
+export const conversationMemberKey = (conversationId: ConversationId, userId: UserId) =>
+  `${conversationId}:${userId}`

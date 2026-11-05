@@ -13,3 +13,12 @@ export function createRandom(seed: number) {
     return ((result ^ (result >>> 14)) >>> 0) / 4294967296
   }
 }
+
+export interface NumberRange {
+  readonly min: number
+  readonly max: number
+}
+
+export function randomInRange({ max, min }: NumberRange, random: () => number = Math.random) {
+  return min + random() * (max - min)
+}

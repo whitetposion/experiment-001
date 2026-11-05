@@ -13,9 +13,9 @@ import {
   sendMessage,
 } from '@/features/messages'
 import { renderWithProviders } from '@/test/render'
-import { TEST_NOW, createTestStore } from '@/test/store'
-import { toConversationId, toMessageId, toUserId, type ConversationId } from '@/types/ids'
-import type { ActiveMessage } from '@/types/message'
+import { incomingMessage } from '@/test/fixtures'
+import { createTestStore } from '@/test/store'
+import { toConversationId, toMessageId, type ConversationId } from '@/types/ids'
 import { MessageList } from './MessageList'
 
 // Every bubble renders one timestamp, so counting these counts bubble renders.
@@ -40,21 +40,8 @@ const ananya = toConversationId('conversation-ananya')
 const dev = toConversationId('conversation-dev')
 const empty = toConversationId('conversation-vikram')
 
-function incoming(conversationId: ConversationId, id: string): ActiveMessage {
-  return {
-    id: toMessageId(id),
-    conversationId,
-    senderId: toUserId('user-rohan'),
-    createdAt: TEST_NOW.toISOString(),
-    replyToMessageId: null,
-    deliveryStatus: 'delivered',
-    state: 'active',
-    text: `Text of ${id}`,
-    editedAt: null,
-    reactions: [],
-    attachments: [],
-  }
-}
+const incoming = (conversationId: ConversationId, id: string) =>
+  incomingMessage(conversationId, id, { text: `Text of ${id}` })
 
 async function renderThread(conversationId: ConversationId, showSender = false) {
   const context = createTestStore()

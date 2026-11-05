@@ -2,9 +2,8 @@ import { markConversationRead, selectSelectedConversationId } from '@/features/c
 import { messageReceived, messageStatusChanged } from '@/features/messages'
 import { presenceChanged, typingStarted, typingStopped } from '@/features/presence'
 import type { ChatEvent } from '@/services/chatApi'
+import { conversationMemberKey } from '@/types/ids'
 import type { AppThunk } from './hooks'
-
-const typingKey = (conversationId: string, userId: string) => `${conversationId}:${userId}`
 
 /**
  * Turns live backend events into Redux actions. Returns the function that disconnects,
@@ -44,7 +43,7 @@ export function connectChatEvents(): AppThunk<() => void> {
         case 'typing-started': {
           const { indicator } = event
           const { conversationId, expiresAt, startedAt, userId } = indicator
-          const key = typingKey(conversationId, userId)
+          const key = conversationMemberKey(conversationId, userId)
           const duration = new Date(expiresAt).getTime() - new Date(startedAt).getTime()
 
           dispatch(typingStarted(indicator))
@@ -64,7 +63,7 @@ export function connectChatEvents(): AppThunk<() => void> {
         case 'typing-stopped': {
           const { conversationId, userId } = event
 
-          clearTypingTimer(typingKey(conversationId, userId))
+          clearTypingTimer(conversationMemberKey(conversationId, userId))
           dispatch(typingStopped({ conversationId, userId }))
           break
         }

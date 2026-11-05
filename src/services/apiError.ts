@@ -1,3 +1,5 @@
+import { GENERIC_ERROR_MESSAGE } from '@/lib/failureMessage'
+
 export type ApiErrorCode =
   'aborted' | 'conflict' | 'forbidden' | 'network' | 'not-found' | 'validation'
 
@@ -28,7 +30,7 @@ export function toApiFailure(error: unknown): ApiFailure {
     return { code: error.code, message: error.message, retryable: error.retryable }
   }
 
-  return { code: 'network', message: 'Something went wrong. Try again.', retryable: true }
+  return { code: 'network', message: GENERIC_ERROR_MESSAGE, retryable: true }
 }
 
 export function isApiError(error: unknown): error is ApiError {

@@ -1,12 +1,9 @@
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { bootstrapApp } from '@/app/bootstrap'
 import { openConversation } from '@/features/conversations'
 import { selectThreadMessageIds } from '@/features/messages'
 import { selectComposerTarget } from '@/features/ui'
-import { renderWithProviders } from '@/test/render'
-import { createTestStore } from '@/test/store'
+import { renderLoaded } from '@/test/render'
 import { toConversationId, type ConversationId } from '@/types/ids'
 import { ChatWindow } from './ChatWindow'
 
@@ -15,17 +12,8 @@ const kabir = toConversationId('conversation-kabir')
 const launch = toConversationId('conversation-launch')
 const priya = toConversationId('conversation-priya')
 
-async function renderChat(conversationId: ConversationId | null, latency = 0) {
-  const context = createTestStore({ latencyMs: { min: latency, max: latency } })
-  await context.store.dispatch(bootstrapApp())
-
-  if (conversationId) {
-    await context.store.dispatch(openConversation(conversationId))
-  }
-
-  renderWithProviders(<ChatWindow />, { store: context.store })
-  return { ...context, user: userEvent.setup() }
-}
+const renderChat = (conversationId: ConversationId | null, latency = 0) =>
+  renderLoaded(<ChatWindow />, { conversationId, latencyMs: { min: latency, max: latency } })
 
 const input = () => screen.getByRole<HTMLTextAreaElement>('textbox', { name: 'Message' })
 const sendButton = () => screen.getByRole('button', { name: 'Send message' })

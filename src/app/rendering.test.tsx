@@ -11,9 +11,9 @@ import {
 } from '@/features/conversations'
 import { messageReceived } from '@/features/messages'
 import { fetchDirectory, presenceChanged, typingStarted } from '@/features/presence'
+import { incomingMessage } from '@/test/fixtures'
 import { TEST_NOW, createTestStore } from '@/test/store'
-import { toConversationId, toMessageId, toUserId, type ConversationId } from '@/types/ids'
-import type { ActiveMessage } from '@/types/message'
+import { toConversationId, toUserId, type ConversationId } from '@/types/ids'
 import { useAppSelector } from './hooks'
 
 // Counts real renders, to show which updates reach which components.
@@ -48,21 +48,8 @@ const rohan = toConversationId('conversation-rohan')
 const launch = toConversationId('conversation-launch')
 const priya = toConversationId('conversation-priya')
 
-function incoming(conversationId: ConversationId, id: string): ActiveMessage {
-  return {
-    id: toMessageId(id),
-    conversationId,
-    senderId: toUserId('user-dev'),
-    createdAt: TEST_NOW.toISOString(),
-    replyToMessageId: null,
-    deliveryStatus: 'delivered',
-    state: 'active',
-    text: 'New',
-    editedAt: null,
-    reactions: [],
-    attachments: [],
-  }
-}
+const incoming = (conversationId: ConversationId, id: string) =>
+  incomingMessage(conversationId, id, { senderId: toUserId('user-dev'), text: 'New' })
 
 async function renderList() {
   const { store } = createTestStore()

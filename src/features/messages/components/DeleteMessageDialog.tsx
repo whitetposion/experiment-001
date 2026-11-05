@@ -1,17 +1,6 @@
-import { useState } from 'react'
 import { useAppDispatch } from '@/app/hooks'
-import { Button } from '@/components/ui/Button'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/Dialog'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { deleteMessage } from '@/features/messages/state/thunks'
-import type { ApiFailure } from '@/services/apiError'
 import type { MessageId } from '@/types/ids'
 
 export interface DeleteMessageDialogProps {
@@ -27,75 +16,20 @@ export function DeleteMessageDialog({
   onCloseAutoFocus,
 }: DeleteMessageDialogProps) {
   const dispatch = useAppDispatch()
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  function close() {
-    setError(null)
-    onClose()
-  }
-
-  async function confirm() {
-    if (!messageId) {
-      return
-    }
-
-    setIsDeleting(true)
-    setError(null)
-
-    try {
-      await dispatch(deleteMessage(messageId)).unwrap()
-      close()
-    } catch (failure) {
-      setError((failure as ApiFailure).message)
-    } finally {
-      setIsDeleting(false)
-    }
-  }
 
   return (
-    <Dialog
-      onOpenChange={(open) => {
-        if (!open) {
-          close()
+    <ConfirmDialog
+      confirmLabel="Delete"
+      description="It will be removed for everyone in this chat. Replies to it stay, and show that it was deleted."
+      onClose={onClose}
+      onCloseAutoFocus={onCloseAutoFocus}
+      onConfirm={async () => {
+        if (messageId) {
+          await dispatch(deleteMessage(messageId)).unwrap()
         }
       }}
       open={messageId !== null}
-    >
-      <DialogContent
-        onCloseAutoFocus={(event) => {
-          event.preventDefault()
-          onCloseAutoFocus()
-        }}
-        size="sm"
-      >
-        <DialogHeader>
-          <DialogTitle>Delete this message?</DialogTitle>
-          <DialogDescription>
-            It will be removed for everyone in this chat. Replies to it stay, and show that it was
-            deleted.
-          </DialogDescription>
-        </DialogHeader>
-        {error ? (
-          <p className="text-sm text-destructive" role="alert">
-            {error}
-          </p>
-        ) : null}
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="secondary">Cancel</Button>
-          </DialogClose>
-          <Button
-            loading={isDeleting}
-            onClick={() => {
-              void confirm()
-            }}
-            variant="destructive"
-          >
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      title="Delete this message?"
+    />
   )
 }

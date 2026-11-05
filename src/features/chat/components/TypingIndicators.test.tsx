@@ -1,10 +1,9 @@
 import { act, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { bootstrapApp } from '@/app/bootstrap'
-import { ConversationSidebar, openConversation } from '@/features/conversations'
+import { ConversationSidebar } from '@/features/conversations'
 import { typingStarted, typingStopped } from '@/features/presence'
-import { renderWithProviders } from '@/test/render'
-import { TEST_NOW, createTestStore } from '@/test/store'
+import { renderLoaded } from '@/test/render'
+import { TEST_NOW } from '@/test/store'
 import { toConversationId, toUserId, type ConversationId } from '@/types/ids'
 import { ChatWindow } from './ChatWindow'
 
@@ -19,15 +18,12 @@ const indicator = (conversationId: ConversationId, user: string) => ({
 })
 
 async function renderChat(conversationId: ConversationId) {
-  const { store } = createTestStore()
-  await store.dispatch(bootstrapApp())
-  await store.dispatch(openConversation(conversationId))
-  renderWithProviders(
+  const { store } = await renderLoaded(
     <>
       <ConversationSidebar />
       <ChatWindow />
     </>,
-    { store },
+    { conversationId },
   )
   return store
 }

@@ -12,7 +12,7 @@ import type {
   ConversationFilter,
   ConversationParticipant,
 } from '@/types/conversation'
-import type { ConversationId, MessageId, UserId } from '@/types/ids'
+import { conversationMemberKey, type ConversationId, type MessageId } from '@/types/ids'
 import type { RequestStatus } from '@/types/request'
 import {
   addGroupMembers,
@@ -26,11 +26,8 @@ export const conversationsAdapter = createEntityAdapter<Conversation>({
   sortComparer: (first, second) => second.updatedAt.localeCompare(first.updatedAt),
 })
 
-export const participantKey = (conversationId: ConversationId, userId: UserId) =>
-  `${conversationId}:${userId}`
-
 export const participantsAdapter = createEntityAdapter<ConversationParticipant, string>({
-  selectId: ({ conversationId, userId }) => participantKey(conversationId, userId),
+  selectId: ({ conversationId, userId }) => conversationMemberKey(conversationId, userId),
 })
 
 export interface ConversationsState extends EntityState<Conversation, ConversationId> {
@@ -42,6 +39,15 @@ export interface ConversationsState extends EntityState<Conversation, Conversati
   readonly filter: ConversationFilter
   readonly status: RequestStatus
   readonly error: ApiFailure | null
+}
+
+function participantKeysOf(
+  participants: ConversationsState['participants'],
+  conversationId: ConversationId,
+) {
+  return participants.ids.filter(
+    (key) => participants.entities[key]?.conversationId === conversationId,
+  )
 }
 
 const initialState: ConversationsState = conversationsAdapter.getInitialState({
@@ -74,9 +80,7 @@ export const conversationsSlice = createSlice({
     /** The current user is no longer a member, so the conversation leaves their list. */
     conversationLeft(state, action: PayloadAction<ConversationId>) {
       const conversationId = action.payload
-      const keys = (state.participants.ids as readonly string[]).filter((key) =>
-        key.startsWith(`${conversationId}:`),
-      )
+      const keys = participantKeysOf(state.participants, conversationId)
 
       conversationsAdapter.removeOne(state, conversationId)
       participantsAdapter.removeMany(state.participants, keys)
@@ -145,9 +149,7 @@ export const conversationsSlice = createSlice({
         isAnyOf(addGroupMembers.fulfilled, removeGroupMember.fulfilled),
         (state, action) => {
           const { conversation, participants } = action.payload
-          const keys = (state.participants.ids as readonly string[]).filter((key) =>
-            key.startsWith(`${conversation.id}:`),
-          )
+          const keys = participantKeysOf(state.participants, conversation.id)
 
           conversationsAdapter.updateOne(state, {
             id: conversation.id,

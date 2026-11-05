@@ -11,6 +11,7 @@ import {
 } from '@/features/conversations/state/selectors'
 import { filterChanged, searchQueryChanged } from '@/features/conversations/state/slice'
 import { fetchConversations } from '@/features/conversations/state/thunks'
+import { GENERIC_ERROR_MESSAGE } from '@/lib/failureMessage'
 import { ConversationItem } from './ConversationItem'
 
 const SKELETON_ROWS = [1, 2, 3, 4, 5, 6]
@@ -127,7 +128,7 @@ export function ConversationList() {
               Try again
             </Button>
           }
-          description={error?.message ?? 'Something went wrong. Try again.'}
+          description={error?.message ?? GENERIC_ERROR_MESSAGE}
           title="Could not load your chats"
         />
       </div>

@@ -3,7 +3,7 @@ import { useEffect, useRef, type RefObject } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import {
   GroupInfoPanel,
-  selectConversationById,
+  selectIsGroupConversation,
   selectSelectedConversationId,
   selectUnreadMarkerId,
 } from '@/features/conversations'
@@ -87,9 +87,7 @@ function ActiveChat({ conversationId }: { conversationId: ConversationId }) {
   const dispatch = useAppDispatch()
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const infoButtonRef = useRef<HTMLButtonElement>(null)
-  const isGroup = useAppSelector(
-    (state) => selectConversationById(state, conversationId)?.type === 'group',
-  )
+  const isGroup = useAppSelector((state) => selectIsGroupConversation(state, conversationId))
 
   // Ready to type on opening. A touch screen would pop up its keyboard, so it waits for a tap.
   useEffect(() => {

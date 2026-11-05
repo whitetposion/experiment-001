@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/Dialog'
 import { IconButton } from '@/components/ui/IconButton'
+import { OnlineDot } from '@/components/ui/OnlineDot'
 import { Separator } from '@/components/ui/Separator'
 import {
   selectCanManageMembers,
@@ -14,7 +15,7 @@ import {
   selectGroupMembers,
   type GroupMemberView,
 } from '@/features/conversations/state/selectors'
-import { formatConversationTime } from '@/lib/formatConversationTime'
+import { formatLastSeen } from '@/lib/formatConversationTime'
 import { formatFullDate } from '@/lib/formatMessageDate'
 import { getInitials } from '@/lib/initials'
 import type { ConversationId, UserId } from '@/types/ids'
@@ -32,7 +33,7 @@ function memberStatus({ isOnline, lastSeenAt }: GroupMemberView) {
     return 'Online'
   }
 
-  return lastSeenAt ? `Last seen ${formatConversationTime(lastSeenAt)}` : 'Offline'
+  return lastSeenAt ? formatLastSeen(lastSeenAt) : 'Offline'
 }
 
 function MemberRow({
@@ -48,9 +49,7 @@ function MemberRow({
     <li className="flex min-h-control items-center gap-3 py-1">
       <span className="relative inline-flex shrink-0">
         <Avatar alt="" fallback={getInitials(member.name)} />
-        {member.isOnline ? (
-          <span className="absolute right-0 bottom-0 size-3 rounded-pill border-2 border-surface-elevated bg-success" />
-        ) : null}
+        {member.isOnline ? <OnlineDot className="size-3 border-surface-elevated" /> : null}
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">

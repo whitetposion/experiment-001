@@ -1,24 +1,16 @@
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { openConversation, selectUnreadCount } from '@/features/conversations'
 import { deleteMessage, editMessage, selectThreadMessageIds } from '@/features/messages'
 import type { MessageSearchResponse } from '@/services/chatApi'
-import { renderWithProviders } from '@/test/render'
-import { createTestStore } from '@/test/store'
+import { renderLoaded } from '@/test/render'
 import { toConversationId, toMessageId } from '@/types/ids'
 import { App } from './App'
-import { bootstrapApp } from './bootstrap'
 
 const rohan = toConversationId('conversation-rohan')
 const launch = toConversationId('conversation-launch')
 
-async function renderApp() {
-  const context = createTestStore()
-  await context.store.dispatch(bootstrapApp())
-  const view = renderWithProviders(<App />, { store: context.store })
-  return { ...context, ...view, user: userEvent.setup() }
-}
+const renderApp = () => renderLoaded(<App />)
 
 const searchBox = () => screen.getByRole('searchbox')
 const chatRow = (name: RegExp) => screen.getByRole('button', { name })

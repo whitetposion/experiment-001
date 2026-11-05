@@ -19,6 +19,7 @@ export {
   selectGroupCreatorName,
   selectGroupMembers,
   selectIsDirectContactOnline,
+  selectIsGroupConversation,
   selectParticipants,
   selectSelectedConversation,
   selectSelectedConversationId,

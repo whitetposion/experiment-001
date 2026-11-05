@@ -2,6 +2,8 @@ import { Ban } from 'lucide-react'
 import { memo } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { Badge } from '@/components/ui/Badge'
+import { listRowClasses } from '@/components/ui/listRow.variants'
+import { ScreenReaderPause } from '@/components/ui/ScreenReaderPause'
 import {
   selectConversationPreview,
   selectConversationTitle,
@@ -16,11 +18,6 @@ import { cn } from '@/lib/cn'
 import { formatConversationTime } from '@/lib/formatConversationTime'
 import type { ConversationId } from '@/types/ids'
 import { ConversationAvatar } from './ConversationAvatar'
-
-/** Separates parts of the row for screen readers, which would otherwise run words together. */
-function Pause() {
-  return <span className="sr-only">, </span>
-}
 
 export interface ConversationItemProps {
   conversationId: ConversationId
@@ -49,8 +46,8 @@ export const ConversationItem = memo(function ConversationItem({
         data-conversation-id={conversationId}
         data-list-item
         className={cn(
-          'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors duration-fast',
-          'focus-visible:outline-2 focus-visible:-outline-offset-2',
+          listRowClasses,
+          'items-center gap-3',
           isSelected ? 'bg-secondary' : 'hover:bg-muted',
         )}
         onClick={() => {
@@ -64,7 +61,7 @@ export const ConversationItem = memo(function ConversationItem({
             <span className="min-w-0 flex-1 truncate font-semibold tracking-tight">
               {title}
               {isOnline ? <span className="sr-only">, Online</span> : null}
-              <Pause />
+              <ScreenReaderPause />
             </span>
             {preview ? (
               <time
@@ -75,7 +72,7 @@ export const ConversationItem = memo(function ConversationItem({
                 dateTime={preview.sentAt}
               >
                 {formatConversationTime(preview.sentAt)}
-                <Pause />
+                <ScreenReaderPause />
               </time>
             ) : null}
           </span>
@@ -83,7 +80,7 @@ export const ConversationItem = memo(function ConversationItem({
             {typingLabel ? (
               <span className={cn('min-w-0 flex-1 truncate', !isSelected && 'text-primary')}>
                 {typingLabel}
-                {hasUnread ? <Pause /> : null}
+                {hasUnread ? <ScreenReaderPause /> : null}
               </span>
             ) : (
               <>
@@ -97,7 +94,7 @@ export const ConversationItem = memo(function ConversationItem({
                 <span className={cn('min-w-0 flex-1 truncate', preview?.isDeleted && 'italic')}>
                   {preview?.senderLabel ? `${preview.senderLabel}: ` : null}
                   {preview?.text ?? 'No messages yet'}
-                  {hasUnread ? <Pause /> : null}
+                  {hasUnread ? <ScreenReaderPause /> : null}
                 </span>
               </>
             )}
