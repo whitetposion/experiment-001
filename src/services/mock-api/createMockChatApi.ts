@@ -105,7 +105,7 @@ function requireText(text: string) {
 export function createMockChatApi({
   now = () => new Date(),
   seed = createMockSeed(now()),
-  latencyMs = { min: 200, max: 700 },
+  latencyMs = { min: 50, max: 150 },
   failureRate = 0,
   random = Math.random,
 }: MockChatApiOptions = {}): MockChatApi {

@@ -24,10 +24,10 @@ export interface SimulationTiming {
 }
 
 export const DEFAULT_TIMING: SimulationTiming = {
-  deliveredAfterMs: { min: 500, max: 1200 },
-  readAfterMs: { min: 1000, max: 3000 },
-  replyAfterMs: { min: 800, max: 2500 },
-  typingForMs: { min: 1500, max: 3500 },
+  deliveredAfterMs: { min: 150, max: 400 },
+  readAfterMs: { min: 300, max: 800 },
+  replyAfterMs: { min: 200, max: 600 },
+  typingForMs: { min: 600, max: 1200 },
   presenceEveryMs: { min: 12_000, max: 30_000 },
   incomingEveryMs: { min: 20_000, max: 45_000 },
 }
